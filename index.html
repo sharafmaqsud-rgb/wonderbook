@@ -208,6 +208,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:500;z-index:70;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
 .spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
+#sync-pill{cursor:pointer}#sync-pill[data-st=ok]{color:var(--mint);border-color:var(--mint)}#sync-pill[data-st=error],#sync-pill[data-st=auth]{color:var(--visit);border-color:var(--visit)}
 .seg-toggle{display:inline-flex;background:var(--surface-2);border-radius:999px;padding:3px}
 .seg-toggle button{border:0;background:none;border-radius:999px;padding:6px 14px;font-weight:500;color:var(--ink-2)}
 .seg-toggle button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.08)}
@@ -242,6 +243,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     </nav>
     <div class="stats" id="stats"></div>
     <div class="actions">
+      <button class="chip" id="sync-pill" data-act="sync-now" hidden></button>
       <button class="btn" data-act="settings" title="Settings and backup" id="btn-settings" hidden aria-label="Settings and backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
       <button class="btn" data-act="add-place" title="Add a place"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="lbl">Add place</span></button>
       <button class="btn primary" data-act="new-memory" title="New memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New memory</span></button>
@@ -645,6 +647,7 @@ ${ms.map(m=>`- ${m.date}: ${m.title}. ${m.body} Highlights: ${(m.highlights||[])
     try{for(const m of memsOf(id)){await B.delMem(m.id);for(const ph of m.photos||[])B.photo?.del(ph).catch(()=>{})}await B.delPlace(id);S.sel=null;toast('Deleted')}catch(err){toast('Could not delete. Try again.')}break}
   case'clear-examples':{try{for(const m of S.memories.filter(x=>x.example))await B.delMem(m.id);for(const p of S.places.filter(x=>x.example))await B.delPlace(p.id);S.sel=null;toast('Examples removed')}catch(err){toast('Could not remove them. Try again.')}break}
   case'settings':openSettings();break;
+  case'sync-now':if(B.sync?.status()==='auth')openSettings();else B.sync?.now();break;
   case'jfilter':S.journalFilter=a.dataset.f;renderJournal();break;
   case'rankcat':S.rankCat=a.dataset.k;renderRankings();break;
   case'rankby':S.rankBy=a.dataset.v;renderRankings();break;
@@ -695,9 +698,61 @@ async function localBackend(){
   const P=new Map(await all('places')),M=new Map(await all('memories')),urls=new Map();
   for(const[id,b]of await all('photos'))urls.set(id,URL.createObjectURL(b));
   const emit=()=>{S.places=[...P].map(([id,d])=>({id,...d}));S.memories=[...M].map(([id,d])=>({id,...d}));if(S.sel?.type==='place'&&!P.has(S.sel.id))S.sel=null;rerender()};
-  const put=async(store,map,id,d)=>{const{id:_,...doc}=d;map.set(id,doc);await tx(store,'readwrite',s=>s.put(doc,id));emit()};
-  const del=async(store,map,id)=>{map.delete(id);await tx(store,'readwrite',s=>s.delete(id));emit()};
+  const put=async(store,map,id,d)=>{const{id:_,...doc}=d;doc.updatedAt=Date.now();map.set(id,doc);await tx(store,'readwrite',s=>s.put(doc,id));emit();scheduleSync()};
+  const del=async(store,map,id)=>{map.delete(id);await tx(store,'readwrite',s=>s.delete(id));ls.set('wb_deleted',{...ls.get('wb_deleted',{}),[id]:Date.now()});emit();scheduleSync()};
+  /* ---- sync between devices through a private GitHub repository the owner controls ---- */
+  const ls={get:(k,d)=>{try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+  const sync={status:'off',running:false,again:false,timer:null};
+  const setStatus=st=>{sync.status=st;const el=$('#sync-pill');if(!el)return;el.hidden=st==='off';el.dataset.st=st;
+    el.textContent={syncing:'Syncing…',ok:'Synced',error:'Sync paused',auth:'Sync needs attention'}[st]||'';el.title=st==='ok'?'Tap to sync now':st==='error'?'Could not reach GitHub. Tap to try again.':''};
+  const gh=(cfg,path,opt={})=>fetch(`https://api.github.com/repos/${cfg.repo}${path}`,{cache:'no-store',...opt,headers:{Authorization:'Bearer '+cfg.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(opt.headers||{})}});
+  const b64e=str=>{const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s)};
+  const b64d=b=>{const s=atob(b.replace(/\s/g,''));const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return new TextDecoder().decode(u)};
+  const canon=o=>JSON.stringify(o,(k,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.keys(v).sort().map(x=>[x,v[x]])):v);
+  const putFile=(cfg,path,content,sha)=>gh(cfg,'/contents/'+path,{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({message:'Wonderbook sync',content,branch:cfg.branch,...(sha?{sha}:{})})});
+  async function syncNow(){const cfg=ls.get('wb_sync',null);if(!cfg)return;if(sync.running){sync.again=true;return}
+    sync.running=true;setStatus('syncing');
+    try{
+      for(let attempt=0;;attempt++){
+        let remote={places:{},memories:{},deleted:{}},sha=null;
+        const r=await gh(cfg,'/contents/journal.json?ref='+encodeURIComponent(cfg.branch));
+        if(r.status===200){const j=await r.json();sha=j.sha;let c=j.content;if(!c)c=(await(await gh(cfg,'/git/blobs/'+j.sha)).json()).content;const d=JSON.parse(b64d(c));remote={places:d.places||{},memories:d.memories||{},deleted:d.deleted||{}}}
+        else if(r.status===401||r.status===403)throw{code:'auth'};
+        else if(r.status!==404)throw{code:'net'};
+        const deleted={...remote.deleted};for(const[k,v]of Object.entries(ls.get('wb_deleted',{})))deleted[k]=Math.max(deleted[k]||0,v);
+        const merge=async(store,map,rem)=>{const out={};
+          for(const id of new Set([...Object.keys(rem),...map.keys()])){const l=map.get(id),m=rem[id];const w=!l?m:!m?l:((m.updatedAt||0)>(l.updatedAt||0)?m:l);
+            if(deleted[id]&&deleted[id]>=(w.updatedAt||0)){if(l){map.delete(id);await tx(store,'readwrite',s=>s.delete(id))}continue}
+            out[id]=w;if(w!==l){map.set(id,w);await tx(store,'readwrite',s=>s.put(w,id))}}
+          return out};
+        const next={v:1,places:await merge('places',P,remote.places),memories:await merge('memories',M,remote.memories),deleted};
+        ls.set('wb_deleted',deleted);emit();
+        if(canon(next)===canon({v:1,...remote}))break;
+        const w=await putFile(cfg,'journal.json',b64e(JSON.stringify(next)),sha);
+        if(w.ok)break;
+        if(w.status===401||w.status===403)throw{code:'auth'};
+        if((w.status===409||w.status===422)&&attempt<3)continue;
+        throw{code:'net'}}
+      /* photos: upload what this device has, download what it is missing */
+      const need=new Set();for(const m of M.values())(m.photos||[]).forEach(x=>need.add(x));for(const p of P.values())if(p.coverId)need.add(p.coverId);
+      const have=new Set();const tr=await gh(cfg,`/git/trees/${encodeURIComponent(cfg.branch)}?recursive=1`);
+      if(tr.ok)for(const t of(await tr.json()).tree||[])if(t.path.startsWith('photos/'))have.add(t.path.slice(7));
+      let got=false;
+      for(const id of need){
+        if(urls.has(id)&&!have.has(id)){const b=await tx('photos','readonly',s=>s.get(id));if(!b)continue;
+          const data=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(String(fr.result).split(',')[1]);fr.readAsDataURL(b)});
+          const w=await putFile(cfg,'photos/'+id,data);if(!w.ok&&w.status!==422)throw{code:w.status===401||w.status===403?'auth':'net'}}
+        else if(!urls.has(id)&&have.has(id)){const r=await gh(cfg,'/contents/photos/'+id+'?ref='+encodeURIComponent(cfg.branch),{headers:{Accept:'application/vnd.github.raw+json'}});
+          if(r.ok){const b=new Blob([await r.arrayBuffer()],{type:'image/jpeg'});await tx('photos','readwrite',s=>s.put(b,id));urls.set(id,URL.createObjectURL(b));got=true}}}
+      if(got)emit();
+      ls.set('wb_synced_at',Date.now());setStatus('ok');
+    }catch(e){setStatus(e?.code==='auth'?'auth':'error')}
+    finally{sync.running=false;if(sync.again){sync.again=false;syncNow()}}}
+  const scheduleSync=()=>{if(!ls.get('wb_sync',null))return;clearTimeout(sync.timer);sync.timer=setTimeout(syncNow,2500)};
   const be={mode:'local',url:id=>urls.get(id)||'',hasAI:()=>true,
+    sync:{cfg:()=>ls.get('wb_sync',null),last:()=>ls.get('wb_synced_at',0),status:()=>sync.status,now:syncNow,
+      connect:async(repo,token)=>{const r=await gh({repo,token},'');if(r.status===401)throw{code:'bad_token'};if(!r.ok)throw{code:'no_repo'};const j=await r.json();if(j.permissions&&j.permissions.push===false)throw{code:'read_only'};ls.set('wb_sync',{repo,token,branch:j.default_branch||'main'});await syncNow()},
+      disconnect:()=>{ls.del('wb_sync');setStatus('off')}},
     photo:{upload:async b=>{const id=uid();await tx('photos','readwrite',s=>s.put(b,id));urls.set(id,URL.createObjectURL(b));return id},
            del:async id=>{await tx('photos','readwrite',s=>s.delete(id));const u=urls.get(id);if(u)URL.revokeObjectURL(u);urls.delete(id)}},
     ai:claudeJSON,
@@ -715,10 +770,11 @@ async function localBackend(){
       for(const[id,u]of Object.entries(data.photos||{})){const b=await fetch(u).then(r=>r.blob());await tx('photos','readwrite',s=>s.put(b,id));if(!urls.has(id))urls.set(id,URL.createObjectURL(b))}
       for(const p of data.places||[]){const{id,...d}=p;P.set(id,d);await tx('places','readwrite',s=>s.put(d,id))}
       for(const m of data.memories||[]){const{id,...d}=m;M.set(id,d);await tx('memories','readwrite',s=>s.put(d,id))}
-      emit();return{places:(data.places||[]).length,memories:(data.memories||[]).length}}};
+      emit();scheduleSync();return{places:(data.places||[]).length,memories:(data.memories||[]).length}}};
   navigator.storage?.persist?.().catch(()=>{});
   S.dict=localDictation();$('#btn-settings').hidden=false;
   S.dbState='ready';emit();
+  if(ls.get('wb_sync',null)){syncNow();document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow()})}
   if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
   return be}
 
@@ -754,7 +810,8 @@ function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
   <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Organising your spoken notes, summaries and suggestions use Claude. Paste your own Claude API key (from console.anthropic.com). It is saved only in this browser and sent only to Anthropic.</p>
   <label class="field">Claude API key<input type="password" id="set-key" value="${esc(key)}" placeholder="sk-ant-…" autocomplete="off"></label>
   <div style="display:flex;gap:8px"><button class="btn primary" id="set-save">Save key</button>${key?'<button class="btn" id="set-clear">Remove key</button>':''}</div></div>
-  <div class="panel-card"><h3>Your data</h3><p class="muted" style="margin:0" id="set-usage">Your journal and photos are stored in this browser on this device. They do not sync to other devices. Download a backup regularly, and use it to move your journal to another device.</p>
+  <div class="panel-card" id="set-sync"></div>
+  <div class="panel-card"><h3>Your data</h3><p class="muted" style="margin:0" id="set-usage">Your journal and photos are stored in this browser on this device. Turn on sync above to share them between your devices. A downloaded backup is a second safe copy.</p>
   <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="set-export">Download backup</button><label class="btn" style="cursor:pointer">Restore from backup<input type="file" id="set-import" accept="application/json,.json" hidden></label></div></div>
   <div class="foot"><button class="btn" data-close>Done</button></div>`,(el,close)=>{const q=s=>el.querySelector(s);
     q('[data-close]').onclick=close;
@@ -762,6 +819,20 @@ function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
     if(q('#set-clear'))q('#set-clear').onclick=()=>{try{localStorage.removeItem('wb_key')}catch(e){}toast('Key removed');close()};
     q('#set-export').onclick=()=>B.exportBackup().then(()=>toast('Backup downloaded')).catch(()=>toast('Could not create the backup.'));
     q('#set-import').onchange=async()=>{const f=q('#set-import').files[0];if(!f)return;try{const r=await B.importBackup(f);toast(`Restored ${r.places} places and ${r.memories} memories`);close()}catch(e){toast('That file is not a Wonderbook backup.')}};
+    const drawSync=()=>{const c=B.sync.cfg(),box=q('#set-sync'),last=B.sync.last(),guess=location.hostname.endsWith('.github.io')?location.hostname.split('.')[0]+'/wonderbook-data':'';
+      if(c){box.innerHTML=`<h3>Sync between devices</h3><p class="muted" style="margin:0">Connected to <b>${esc(c.repo)}</b>, a private GitHub repository. ${B.sync.status()==='auth'?'GitHub rejected the saved token. Disconnect and connect again with a new one.':last?'Last synced '+new Date(last).toLocaleString()+'.':'Not synced yet.'}</p><div style="display:flex;gap:8px"><button class="btn primary" id="sy-now">Sync now</button><button class="btn" id="sy-off">Disconnect this device</button></div>`;
+        q('#sy-now').onclick=async()=>{q('#sy-now').disabled=true;await B.sync.now();drawSync();toast(B.sync.status()==='ok'?'Synced':'Sync did not finish. Try again.')};
+        q('#sy-off').onclick=()=>{B.sync.disconnect();drawSync()}}
+      else{box.innerHTML=`<h3>Sync between devices</h3><p class="muted" style="margin:0">Keeps your journal and photos the same on your phone and laptop, stored in a private GitHub repository only you can open. Paste the same access token on each device.</p>
+        <label class="field">Private repository<input type="text" id="sy-repo" value="${esc(guess)}" placeholder="username/wonderbook-data" autocomplete="off" autocapitalize="off"></label>
+        <label class="field">GitHub access token<input type="password" id="sy-token" placeholder="github_pat_…" autocomplete="off"></label>
+        <p class="muted" id="sy-msg" style="margin:0;min-height:1.4em"></p><button class="btn primary" id="sy-on" style="align-self:flex-start">Connect</button>`;
+        q('#sy-on').onclick=async()=>{const repo=q('#sy-repo').value.trim().replace(/^https:\/\/github\.com\//,'').replace(/\/$/,''),token=q('#sy-token').value.trim();
+          if(!/^[\w.-]+\/[\w.-]+$/.test(repo)||!token){q('#sy-msg').textContent='Enter the repository as username/name, and paste the token.';return}
+          q('#sy-on').disabled=true;q('#sy-msg').innerHTML='<span class="spinner"></span> Connecting…';
+          try{await B.sync.connect(repo,token);drawSync();toast('Sync is on')}
+          catch(e){q('#sy-on').disabled=false;q('#sy-msg').textContent=e?.code==='bad_token'?'GitHub rejected that token. Check you copied all of it.':e?.code==='read_only'?'That token can read the repository but not save to it. It needs Contents: Read and write.':e?.code==='no_repo'?'Could not open that repository with this token. Check the name and that the token includes it.':'Could not reach GitHub. Check your connection.'}}}};
+    drawSync();
     navigator.storage?.estimate?.().then(e=>{if(e?.usage!=null)q('#set-usage').textContent+=` Using ${(e.usage/1048576).toFixed(1)} MB so far.`}).catch(()=>{})})}
 
 /* ---------- boot ---------- */
