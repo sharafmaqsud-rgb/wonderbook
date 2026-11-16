@@ -513,7 +513,19 @@ function openAddPlace(opts={}){
   <div class="row2"><label class="field">City or country<input type="text" id="ap-name" placeholder="e.g. Kyoto" autocomplete="off"></label><label class="field">Country (optional)<input type="text" id="ap-country" value="${esc(opts.country||'')}" placeholder="e.g. Japan"></label></div>
   <label class="field" id="ap-yrs-f">Years visited<input type="text" id="ap-years" placeholder="e.g. 2019, 2024" inputmode="numeric"></label>
   <p class="muted" id="ap-msg" style="margin:0;min-height:1.5em"></p>
+  <div class="list" id="ap-sugg"></div>
   <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ap-go">Add place</button></div>`,(m,close)=>{
+    const msg=m.querySelector('#ap-msg'),box=m.querySelector('#ap-sugg');let found=[],seq=0,timer=null;
+    const yrs=()=>status==='visited'?(m.querySelector('#ap-years').value.match(/\d{4}/g)||[]).map(Number):[];
+    const add=r=>{close();const f=countryForPoint(r.lng,r.lat)||G.features.find(x=>x.properties.name.toLowerCase()===String(r.country||'').toLowerCase());
+      createPlace({status,years:yrs(),name:r.name,kind:r.kind==='country'?'country':'city',country:r.kind==='country'?r.name:(f?.properties.name||r.country||''),lat:r.lat,lng:r.lng,countryId:f?.id||null})};
+    const draw=()=>{box.innerHTML=found.map((r,i)=>`<button type="button" class="place-row" data-i="${i}"><span class="dotc" style="background:${r.kind==='country'?'var(--mint)':'var(--visit-2)'}"></span><span class="nm">${esc(r.name)}<span class="muted" style="font-weight:400"> · ${esc(r.kind==='country'?'Country':[r.region,r.country].filter(Boolean).join(', '))}</span></span></button>`).join('')};
+    box.onclick=e=>{const b=e.target.closest('[data-i]');if(b)add(found[+b.dataset.i])};
+    const look=async()=>{const q=m.querySelector('#ap-name').value.trim();if(!B.suggest||q.length<2){found=[];draw();return found}
+      const my=++seq;try{const r=await B.suggest(q,m.querySelector('#ap-country').value.trim());if(my!==seq)return found;found=r;draw();
+        msg.textContent=r.length?(r.some(x=>x.name.toLowerCase()===q.toLowerCase())?'Pick the right one:':'Did you mean one of these?'):'No match yet. Keep typing, or check the spelling.'}catch(e){if(my===seq){found=[];draw()}}
+      return found};
+    if(B.suggest)m.querySelector('#ap-name').oninput=m.querySelector('#ap-country').oninput=()=>{clearTimeout(timer);timer=setTimeout(look,350)};
     const setSt=v=>{status=v;m.querySelectorAll('#ap-st button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));m.querySelector('#ap-yrs-f').hidden=v!=='visited'};setSt(status);
     m.querySelector('#ap-st').onclick=e=>{const b=e.target.closest('button');if(b)setSt(b.dataset.v)};
     m.querySelector('[data-close]').onclick=close;m.querySelector('#ap-name').focus();
@@ -521,6 +533,11 @@ function openAddPlace(opts={}){
       const country=m.querySelector('#ap-country').value.trim();const years=(m.querySelector('#ap-years').value.match(/\d{4}/g)||[]).map(Number);
       const btn=m.querySelector('#ap-go');btn.disabled=true;m.querySelector('#ap-msg').innerHTML='<span class="spinner"></span> Finding it on the map…';
       const draft={name,country,status,years:status==='visited'?years:[]};
+      if(B.suggest){clearTimeout(timer);try{const rs=await look();btn.disabled=false;const ex=rs.filter(x=>x.name.toLowerCase()===name.toLowerCase());
+          if(ex.length===1||(ex.length>1&&country)){add(ex[0]);return}
+          if(rs.length){msg.textContent=ex.length?'There is more than one. Pick the right one:':'Did you mean one of these?';return}
+          msg.innerHTML='Couldn’t find that place. Check the spelling or add the country. <button class="btn sm" id="ap-pick">Place it on the map myself</button>';m.querySelector('#ap-pick').onclick=()=>{close();startPick(draft)};return
+        }catch(e){btn.disabled=true}}
       try{const r=await B.geocode(name,country);
         if(!r?.found||typeof r.lat!=='number'){m.querySelector('#ap-msg').innerHTML='Couldn’t find that place. Check the spelling or add the country. <button class="btn sm" id="ap-pick">Place it on the map myself</button>';m.querySelector('#ap-pick').onclick=()=>{close();startPick(draft)};btn.disabled=false;return}
         close();const f=countryForPoint(r.lng,r.lat)||G.features.find(x=>x.properties.name.toLowerCase()===String(r.country||'').toLowerCase());
@@ -542,7 +559,7 @@ function openComposer(opts={}){
   <div class="mic-zone"><button class="mic" id="c-mic" type="button" aria-label="Start talking" ${S.dict?'':'hidden'}>${ICON.mic}</button><div style="flex:1;min-width:0"><b id="c-micst">${S.dict?'Tap the mic and talk it through':'Type or paste your thoughts'}</b><div class="muted" style="font-size:13px">Ramble freely. Then tap Organise and Wonderbook writes it up.</div></div></div>
   <label class="field">What happened<textarea id="c-tr" rows="5" placeholder="Where you went, who you were with, what you ate, how it felt…">${esc(m.transcript||'')}</textarea></label>
   <div class="partial" id="c-partial"></div>
-  ${B.hasAI()?`<button class="btn violet" id="c-ai" type="button" style="align-self:flex-start">${ICON.spark} Organise with AI</button>`:''}
+  ${B.hasAI()?`<button class="btn violet" id="c-ai" type="button" style="align-self:flex-start">${ICON.spark} Organise my notes</button>`:''}
   <label class="field">Title<input type="text" id="c-title" value="${esc(m.title||'')}" placeholder="Sunset on the Alfama rooftops"></label>
   <label class="field">Summary<textarea id="c-body" rows="3">${esc(m.body||'')}</textarea></label>
   <div class="row2"><label class="field">Highlights (one per line)<textarea id="c-hi" rows="4">${esc((m.highlights||[]).join('\n'))}</textarea></label><label class="field">Takeaways (one per line)<textarea id="c-tk" rows="4">${esc((m.takeaways||[]).join('\n'))}</textarea></label></div>
@@ -566,7 +583,7 @@ function openComposer(opts={}){
     const ai=q('#c-ai');if(ai)ai.onclick=async()=>{const text=tr.value.trim();if(text.length<10){toast('Say or type a little more first.');return}
       if(S.dict?.active())await S.dict.stop().catch(()=>{});
       const p=place(q('#c-place').value);ai.disabled=true;ai.innerHTML='<span class="spinner"></span> Organising…';
-      try{const r=await B.ai(`You help someone keep a personal travel journal. Below is what they said out loud (dictated, so it may ramble) about a memory${p?` in ${p.name}${p.kind==='country'?'':', '+p.country}`:''}${q('#c-date').value?` on ${q('#c-date').value}`:''}.
+      try{const r=await organise(text,`You help someone keep a personal travel journal. Below is what they said out loud (dictated, so it may ramble) about a memory${p?` in ${p.name}${p.kind==='country'?'':', '+p.country}`:''}${q('#c-date').value?` on ${q('#c-date').value}`:''}.
 Turn it into a tidy journal entry in their own voice: first person, warm, specific. Use only what they said; do not invent details.
 Return JSON only, with this shape:
 {"title": "short evocative title, at most 7 words",
@@ -583,7 +600,7 @@ What they said:
         const rt=Object.fromEntries(Object.entries(r.ratings||{}).filter(([k,v])=>CATS.some(c=>c.k===k)&&Number.isFinite(+v)).map(([k,v])=>[k,Math.max(1,Math.min(10,Math.round(+v)))]));
         if(Object.keys(rt).length){D.ratings=rt;const box=q('#c-rates');box.hidden=false;box.className='ai-box';box.innerHTML=`<span class="eyebrow">Ratings you hinted at</span><div class="chips">${Object.entries(rt).map(([k,v])=>`<span class="pill">${CATS.find(c=>c.k===k).short} <b class="mono">${v}</b></span>`).join('')}</div><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="c-apply" checked> Add these to the place’s ratings where I haven’t rated yet</label>`}
         toast('Organised. Check it over, then save.');
-      }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise with AI`}};
+      }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise my notes`}};
     // save
     q('#c-save').onclick=async()=>{const placeId=q('#c-place').value;if(!placeId){toast('Choose which place this memory is from.');q('#c-place').focus();return}
       const btn=q('#c-save');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving…';
@@ -642,14 +659,14 @@ document.addEventListener('click',async e=>{const a=e.target.closest('[data-act]
   case'todo-toggle':{const p=place(id);savePlace(id,{todo:(p.todo||[]).map(t=>t.id===a.dataset.tid?{...t,done:a.checked}:t)});break}
   case'todo-del':{e.preventDefault();const p=place(id);savePlace(id,{todo:(p.todo||[]).filter(t=>t.id!==a.dataset.tid)});break}
   case'suggest':{const p=place(id);S.suggestions[id]='loading';rerender();
-    try{const r=await B.ai(`Suggest the 8 best things to see or do in ${p.name}${p.kind==='country'?'':', '+p.country} for a traveller who loves famous landmarks, watching live sport (name specific local teams, stadiums or big annual events), great local food, and memorable experiences.
+    try{const r=await suggestAI(`Suggest the 8 best things to see or do in ${p.name}${p.kind==='country'?'':', '+p.country} for a traveller who loves famous landmarks, watching live sport (name specific local teams, stadiums or big annual events), great local food, and memorable experiences.
 Return JSON only: {"items":[{"name":"specific name","type":"one of: landmark, sport, event, experience, food, nature","note":"why it's worth it, at most 12 words"}]}`);
       const have=new Set((p.todo||[]).map(t=>t.text.toLowerCase()));S.suggestions[id]=(r.items||[]).filter(it=>it?.name&&!have.has(it.name.toLowerCase())).map(it=>({...it,type:TODO_TYPES.includes(it.type)?it.type:'experience'}))}
     catch(err){delete S.suggestions[id];toast(aiErr(err))}rerender();break}
   case'sugg-add':{const p=place(id);const it=S.suggestions[id][+a.dataset.i];S.suggestions[id]=S.suggestions[id].filter(x=>x!==it);if(!S.suggestions[id].length)delete S.suggestions[id];
     p.todo=[...(p.todo||[]),{id:uid(),text:it.name,type:it.type,done:false}];rerender();savePlace(id,{todo:p.todo});break}
   case'summarise':{const p=place(id);const ms=memsOf(id);a.disabled=true;a.innerHTML='<span class="spinner"></span> Summarising…';
-    try{const r=await B.ai(`Here are someone's travel journal entries about ${p.name}. Summarise their overall experience of the place in their own voice (first person).
+    try{const r=await summarise(p,ms,`Here are someone's travel journal entries about ${p.name}. Summarise their overall experience of the place in their own voice (first person).
 Return JSON only: {"summary":"2-3 sentences","highlights":["up to 5 best moments"],"takeaways":["up to 4 lessons, feelings, or advice to a friend"]}
 Entries:
 ${ms.map(m=>`- ${m.date}: ${m.title}. ${m.body} Highlights: ${(m.highlights||[]).join('; ')}. Takeaways: ${(m.takeaways||[]).join('; ')}`).join('\n').slice(0,14000)}`);
@@ -676,6 +693,64 @@ window.addEventListener('hashchange',route);
 function rerender(){renderStats();if(S.view==='globe'){renderPanel();renderModes();render()}else if(S.view==='journal')renderJournal();else if(S.view==='rankings')renderRankings();else renderWishlist()}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{renderModes();render();rerender()});
 new MutationObserver(()=>{renderModes();render()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- built-in organiser: works with no key and no connection ---------- */
+const POS=['amazing','incredible','loved','love','best','beautiful','favourite','favorite','great','fantastic','delicious','stunning','wonderful','perfect','unreal','brilliant','awesome','gorgeous','friendly','fun','lovely','excellent','unforgettable','magical','highlight','good','nice','tasty','cheap','safe','easy','clean','welcoming','vibrant','buzzing','special','enjoyed','happy','impressive','breathtaking'];
+const STRONG=['amazing','incredible','best','unreal','perfect','unforgettable','magical','stunning','fantastic','loved','favourite','favorite','brilliant','gorgeous','excellent','breathtaking'];
+const NEG=['bad','terrible','awful','worst','boring','dirty','expensive','overpriced','rude','unsafe','dangerous','disappointing','disappointed','crowded','touristy','hate','hated','sketchy','slow','confusing','bland','dull','scam','dodgy','rough','stressful','pricey','tiring','underwhelming'];
+const CATWORDS={live:['live here','living here','move here','could live','would live','wouldn\'t live','couldn\'t live','settle here','livable','liveable'],
+  food:['food','ate','eat','eating','restaurant','meal','dinner','lunch','breakfast','cuisine','dish','coffee','tapas','sushi','pizza','pasta','wine','beer','bakery','market'],
+  people:['people','locals','everyone','strangers','host','guide'],
+  sights:['museum','cathedral','temple','castle','tower','monument','palace','landmark','attraction','sights','sightseeing','old town','architecture','gallery','stadium'],
+  nature:['beach','mountain','hike','hiking','park','lake','river','sunset','sunrise','nature','view','views','island','sea','ocean','forest','waterfall','coast'],
+  nightlife:['nightlife','bar','bars','club','clubs','night out','party','pub','pubs','live music'],
+  value:['cheap','expensive','price','prices','value','affordable','overpriced','cost','pricey','budget'],
+  safety:['safe','safety','unsafe','dangerous','sketchy','pickpocket','dodgy'],
+  transport:['metro','train','trains','bus','buses','tram','subway','taxi','uber','walkable','transport','getting around','traffic'],
+  vibe:['vibe','atmosphere','energy','buzz','charm','character']};
+const TAGWORDS={'Food':CATWORDS.food,'People':['met','friend','friends','locals','family','together'],
+  'Sport & events':['match','game','stadium','football','soccer','basketball','rugby','cricket','tennis','grand prix','race','concert','festival','gig','derby','tournament','final','fans'],
+  'Nature':['beach','mountain','hike','hiking','lake','sunset','sunrise','nature','island','ocean','forest','waterfall','coast'],'Culture':['museum','temple','cathedral','church','history','historic','art','gallery','architecture','tradition','old town','culture','mosque','palace'],
+  'Nightlife':CATWORDS.nightlife,'Adventure':['hike','climb','dive','diving','surf','surfing','kayak','trek','cycling','rafting','snorkel','ski','skiing','adventure','zipline']};
+const hasWord=(low,w)=>new RegExp('(^|[^a-z])'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^a-z])').test(low);
+function sentiment(low){let s=0;for(const w of POS)if(hasWord(low,w))s+=STRONG.includes(w)?2:1;for(const w of NEG)if(hasWord(low,w))s-=1;
+  if(s>0&&/(^|[^a-z])(not|never|wasn't|isn't|weren't|aren't|didn't|don't)($|[^a-z])/.test(low))s=-1;return s}
+function sentences(text){const clean=text.replace(/\b(u+m+|u+h+|e+r+m+|you know|i mean)\b,?\s*/gi,'').replace(/\s+/g,' ').trim();
+  let parts=clean.split(/(?<=[.!?])\s+|\n+/);
+  parts=parts.flatMap(p=>p.split(' ').length>34?p.split(/,?\s+(?:and then|and after that|after that|then)\s+/i):[p]);
+  return parts.map(p=>p.trim().replace(/^(so|and|well|okay|ok|but)[, ]+/i,'')).filter(p=>p.split(' ').length>=3).map(p=>p.charAt(0).toUpperCase()+p.slice(1))}
+const clip=(s,n)=>{const w=s.replace(/[.!?]+$/,'').split(' ');return w.length<=n?w.join(' '):w.slice(0,n).join(' ').replace(/[,;:]$/,'')+'…'};
+function organiseLocally(text){
+  const ss=sentences(text);if(!ss.length)return{title:clip(text,7),summary:text.trim(),highlights:[],takeaways:[],tags:['Moment'],ratings:{}};
+  const sc=ss.map(s=>({s,low:s.toLowerCase(),v:sentiment(s.toLowerCase())}));
+  const top=[...sc].filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,4);const highlights=sc.filter(x=>top.includes(x)).map(x=>clip(x.s,16));
+  const takeRe=/(^|[^a-z])(next time|should|recommend|tip|learned|learnt|avoid|worth|need to|wish|definitely|make sure|go back|if you|don't)($|[^a-z])/;
+  const takeaways=sc.filter(x=>takeRe.test(x.low)&&!top.includes(x)).slice(0,3).map(x=>clip(x.s,18));
+  const stop=/\s+(and|the|a|an|of|in|to|with|at|on|for|was|were|is|we|i|it|that|this|my|our|so|but)$/i;
+  let title=clip((top[0]||sc[0]).s.replace(/^(today|yesterday|this morning|tonight|last night|then|after that)[, ]+/i,'').split(/[,;]| and | but | because /)[0],7).replace(/…$/,'');while(stop.test(title))title=title.replace(stop,'');
+  title=title.charAt(0).toUpperCase()+title.slice(1);
+  let summary='';for(const x of sc){if((summary+' '+x.s).split(' ').length>60&&summary)break;summary+=(summary?' ':'')+x.s.replace(/[.!?]*$/,'.')}
+  const low=text.toLowerCase();const tags=Object.entries(TAGWORDS).filter(([,ws])=>ws.some(w=>hasWord(low,w))).map(([t])=>t);
+  const ratings={};
+  const clauses=sc.flatMap(x=>x.s.split(/[,;]| but | and /)).map(c=>c.toLowerCase().trim()).filter(Boolean).map(c=>({low:c,v:sentiment(c)}));
+  for(const[k,ws]of Object.entries(CATWORDS)){const hit=clauses.filter(x=>ws.some(w=>hasWord(x.low,w)));if(!hit.length)continue;
+    const num=hit.map(x=>x.low.match(/(\d{1,2})\s*(?:\/|out of)\s*10/)).find(Boolean);
+    if(num){ratings[k]=Math.max(1,Math.min(10,+num[1]));continue}
+    if(k==='live'){ratings[k]=/wouldn't|couldn't|would not|could not|never/.test(hit.map(x=>x.low).join(' '))?3:8;continue}
+    const v=hit.reduce((a,x)=>a+x.v,0);
+    if(v>=2)ratings[k]=9;else if(v===1)ratings[k]=8;else if(v===-1)ratings[k]=4;else if(v<=-2)ratings[k]=3}
+  return{title,summary,highlights,takeaways,tags:tags.length?tags:['Moment'],ratings}}
+function summariseLocally(p,ms){const uniq=a=>[...new Set(a.map(x=>x.trim()).filter(Boolean))];const fav=[...ms].sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0));
+  const ys=uniq(ms.map(m=>(m.date||'').slice(0,4))).sort();
+  const lead=fav.slice(0,2).map(m=>(m.body||'').split(/(?<=[.!?])\s+/)[0]).filter(Boolean).join(' ');
+  return{summary:`${ms.length} ${ms.length===1?'memory':'memories'} from ${p.name}${ys.length?' ('+(ys.length>1?ys[0]+' to '+ys[ys.length-1]:ys[0])+')':''}. ${lead}`.trim(),
+    highlights:uniq(fav.flatMap(m=>m.highlights||[])).slice(0,5),takeaways:uniq(fav.flatMap(m=>m.takeaways||[])).slice(0,4)}}
+/* A browser's own on-device model, where one is already installed. Never downloads one. */
+async function builtinAI(prompt){const LM=self.LanguageModel;if(!LM)return null;try{if(await LM.availability()!=='available')return null;const s=await LM.create();const t=await s.prompt(prompt);s.destroy?.();return parseJSON(t)}catch(e){return null}}
+const noKey=e=>B.mode==='local'&&e?.code==='no_key';
+async function organise(text,prompt){try{return await B.ai(prompt)}catch(e){if(noKey(e))return(await builtinAI(prompt))||organiseLocally(text);throw e}}
+async function summarise(p,ms,prompt){try{return await B.ai(prompt)}catch(e){if(noKey(e))return(await builtinAI(prompt))||summariseLocally(p,ms);throw e}}
+async function suggestAI(prompt){try{return await B.ai(prompt)}catch(e){if(noKey(e)){const r=await builtinAI(prompt);if(r)return r}throw e}}
 
 /* ---------- backends: the same app runs as a Claude artifact or as a standalone site ---------- */
 let B={url:()=>'',hasAI:()=>false,photo:null};
@@ -767,6 +842,11 @@ async function localBackend(){
     photo:{upload:async b=>{const id=uid();await tx('photos','readwrite',s=>s.put(b,id));urls.set(id,URL.createObjectURL(b));return id},
            del:async id=>{await tx('photos','readwrite',s=>s.delete(id));const u=urls.get(id);if(u)URL.revokeObjectURL(u);urls.delete(id)}},
     ai:claudeJSON,
+    suggest:async(q,country)=>{const r=await fetch('https://photon.komoot.io/api/?limit=7&lang=en&layer=city&layer=country&q='+encodeURIComponent(q)).then(r=>r.json());const out=[],seen=new Set();
+      for(const f of r.features||[]){const p=f.properties||{},c=f.geometry?.coordinates;if(!p.name||!c)continue;const kind=p.type==='country'?'country':'city';const o={kind,name:p.name,country:kind==='country'?p.name:(p.country||''),region:kind==='country'?'':(p.state||p.county||''),lat:c[1],lng:c[0]};
+        const key=o.name+'|'+o.region+'|'+o.country;if(seen.has(key))continue;seen.add(key);out.push(o)}
+      if(country){const cl=country.toLowerCase();out.sort((a,b)=>(b.country.toLowerCase().includes(cl)?1:0)-(a.country.toLowerCase().includes(cl)?1:0))}
+      return out},
     geocode:async(name,country)=>{const c=geoCountry(name);if(c)return c;
       const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=en&format=json&name='+encodeURIComponent(name)).then(r=>r.json());
       const rs=r.results||[];if(!rs.length)return{found:false};
@@ -809,7 +889,7 @@ function localDictation(){const SR=window.SpeechRecognition||window.webkitSpeech
   return{active:()=>on,
     start:()=>new Promise((res,rej)=>{on=true;rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-GB';S.dictTarget?.state('starting');
       rec.onstart=()=>{S.dictTarget?.state('listening');res()};
-      rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)S.dictTarget?.append(' '+x[0].transcript.trim());else interim+=x[0].transcript}S.dictTarget?.partial(interim)};
+      rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal){const t=x[0].transcript.trim();if(t)S.dictTarget?.append(' '+t.charAt(0).toUpperCase()+t.slice(1)+(/[.!?]$/.test(t)?'':'.'))}else interim+=x[0].transcript}S.dictTarget?.partial(interim)};
       rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){on=false;rej({code:'not_granted'})}};
       rec.onend=()=>{if(on){try{rec.start();return}catch(_){on=false}}S.dictTarget?.state('idle','stopped')};
       try{rec.start()}catch(e){on=false;rej({code:'upstream_error'})}}),
@@ -818,7 +898,7 @@ function localDictation(){const SR=window.SpeechRecognition||window.webkitSpeech
 function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
   let key='';try{key=localStorage.getItem('wb_key')||''}catch(e){}
   openModal(`<h2>Settings</h2>
-  <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Organising your spoken notes, summaries and suggestions use Claude. Paste your own Claude API key (from console.anthropic.com). It is saved only in this browser and sent only to Anthropic.</p>
+  <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Optional. Wonderbook organises your notes on this device with no key. Adding your own Claude API key (from console.anthropic.com) gives better write-ups and switches on Suggest things to do. It is saved only in this browser and sent only to Anthropic.</p>
   <label class="field">Claude API key<input type="password" id="set-key" value="${esc(key)}" placeholder="sk-ant-…" autocomplete="off"></label>
   <div style="display:flex;gap:8px"><button class="btn primary" id="set-save">Save key</button>${key?'<button class="btn" id="set-clear">Remove key</button>':''}</div></div>
   <div class="panel-card" id="set-sync"></div>
