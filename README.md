@@ -5,3 +5,4 @@ A personal travel journal: a globe of places you've been, voice-dictated memorie
 - `index.html` is the app source.
 - `python3 build.py` builds the site into `docs/`, which GitHub Pages serves.
 - Your journal and photos are stored in the browser on your device, not in this repository. Use Settings > Download backup to keep a copy.
+- Place search uses Photon (OpenStreetMap), and the "quick picks" of famous spots near a city come from Wikipedia. Only the city name or its coordinates are sent, never your journal.

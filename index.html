@@ -2,232 +2,401 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Special+Elite&display=swap">
 <style>
-/* Layout: a living globe is the hero; a side journal panel (bottom sheet on phones) shows what you tap. */
+/* Scrapbook: a cream paper desk, polaroids held down with washi tape, sticker buttons, handwritten headings.
+   The globe stays the hero; the side panel is a notebook page (a bottom sheet on phones). */
 :root{
-  --bg:#F3F6FD; --surface:#FFFFFF; --surface-2:#EBF0FA; --ink:#121A33; --ink-2:#56608A; --line:#DAE1F0;
-  --ocean:#D3ECFB; --ocean-2:#9FD3F4; --land:#F7F9FD; --land-line:#C3CEE4;
-  --visit:#FF5B3A; --visit-2:#FF2A85; --wish:#7A5CFF; --sun:#FFBE2E; --mint:#11B5A4;
-  --glow:rgba(70,140,230,.28); --shadow:0 10px 30px rgba(30,45,90,.10);
-  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --bg:#F7EFDD; --surface:#FFFCF4; --surface-2:#F2E8D2; --ink:#2A2238; --ink-2:#6B6078; --line:#DDCFB2;
+  --ocean:#CFECF6; --ocean-2:#92D2E8; --land:#FFF8E8; --land-line:#C8B78C;
+  --visit:#FF6A3D; --visit-2:#EE2F6E; --wish:#6B55F2; --sun:#FFC62E; --mint:#14B8A2; --sky:#3BA6EF;
+  --on:#2A2238; --on-wish:#FFFFFF; --photo:#FFFFFF; --photo-ink:#2A2238; --photo-ink-2:#6B6078;
+  --note-y:#FFE88A; --note-p:#FFC4D6; --note-b:#BFE6FA; --note-g:#C5F0D8; --note-ink:#2A2238;
+  --glow:rgba(120,90,40,.24); --shadow:0 10px 24px rgba(70,50,20,.16);
+  --font-display:'Caveat','Bradley Hand','Segoe Print',cursive;
   --font-body:'DM Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
-  --font-mono:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
-  --r:18px;
+  --font-mono:'Special Elite','Courier New',ui-monospace,monospace;
+  --r:6px; --wob:255px 18px 225px 18px/18px 225px 18px 255px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#090E1E; --surface:#111A33; --surface-2:#18233F; --ink:#EEF2FF; --ink-2:#9AA5CB; --line:#253152;
-  --ocean:#0E1C3B; --ocean-2:#173263; --land:#1E2A48; --land-line:#34426C;
-  --visit:#FF6A4A; --visit-2:#FF3D93; --wish:#9580FF; --sun:#FFC948; --mint:#22CDBB;
-  --glow:rgba(90,130,255,.35); --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}}
+  --bg:#1C1824; --surface:#27212F; --surface-2:#332B3E; --ink:#F7EFDD; --ink-2:#B9ADC4; --line:#463C55;
+  --ocean:#16304D; --ocean-2:#1F5278; --land:#3A3246; --land-line:#63577A;
+  --visit:#FF7B52; --visit-2:#FF4F8A; --wish:#9685FF; --sun:#FFCF4D; --mint:#2AD3BD; --sky:#5DB9F5;
+  --on:#231C2E; --on-wish:#231C2E; --photo:#F4ECDD;
+  --note-y:#F3D96B; --note-p:#F2A9C0; --note-b:#A6D6EE; --note-g:#A9DFC2;
+  --glow:rgba(0,0,0,.5); --shadow:0 10px 24px rgba(0,0,0,.45); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#090E1E; --surface:#111A33; --surface-2:#18233F; --ink:#EEF2FF; --ink-2:#9AA5CB; --line:#253152;
-  --ocean:#0E1C3B; --ocean-2:#173263; --land:#1E2A48; --land-line:#34426C;
-  --visit:#FF6A4A; --visit-2:#FF3D93; --wish:#9580FF; --sun:#FFC948; --mint:#22CDBB;
-  --glow:rgba(90,130,255,.35); --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}
+  --bg:#1C1824; --surface:#27212F; --surface-2:#332B3E; --ink:#F7EFDD; --ink-2:#B9ADC4; --line:#463C55;
+  --ocean:#16304D; --ocean-2:#1F5278; --land:#3A3246; --land-line:#63577A;
+  --visit:#FF7B52; --visit-2:#FF4F8A; --wish:#9685FF; --sun:#FFCF4D; --mint:#2AD3BD; --sky:#5DB9F5;
+  --on:#231C2E; --on-wish:#231C2E; --photo:#F4ECDD;
+  --note-y:#F3D96B; --note-p:#F2A9C0; --note-b:#A6D6EE; --note-g:#A9DFC2;
+  --glow:rgba(0,0,0,.5); --shadow:0 10px 24px rgba(0,0,0,.45); color-scheme:dark}
 
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;overflow:hidden}
+body{background:var(--bg) radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--ink) 10%,transparent) 1px,transparent 1.5px) 0 0/22px 22px;color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;overflow:hidden}
 *{box-sizing:border-box}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2.5px solid var(--wish);outline-offset:2px;border-radius:8px}
-h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
-.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;font-weight:700;line-height:1}
+.mono{font-family:var(--font-mono)}
 .muted{color:var(--ink-2)}
 .app{height:100%;display:flex;flex-direction:column}
+.hl{background:linear-gradient(transparent 58%,color-mix(in srgb,var(--sun) 70%,transparent) 58% 92%,transparent 92%);padding:0 .12em}
 
 /* Header */
-header.top{display:flex;align-items:center;gap:16px;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+header.top{display:flex;align-items:center;gap:16px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:2px dashed var(--line);background:var(--surface);flex-wrap:wrap;position:relative;z-index:5}
 .brand{display:flex;align-items:center;gap:10px}
-.brand-mark{width:34px;height:34px;border-radius:50%;background:conic-gradient(from 200deg,var(--visit-2),var(--visit),var(--sun),var(--mint),var(--wish),var(--visit-2));position:relative;flex:none}
-.brand-mark::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
-.brand h1{font-size:23px;font-weight:800}
-nav.tabs{display:flex;gap:4px;background:var(--surface-2);padding:4px;border-radius:999px}
-nav.tabs a{padding:7px 14px;border-radius:999px;text-decoration:none;color:var(--ink-2);font-weight:500;font-size:14px}
-nav.tabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(20,30,70,.10)}
+.brand-mark{width:36px;height:36px;border-radius:50%;background:conic-gradient(from 200deg,var(--visit-2),var(--visit),var(--sun),var(--mint),var(--wish),var(--visit-2));position:relative;flex:none;border:2px solid var(--ink);animation:bob 5s ease-in-out infinite}
+.brand-mark::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface);border:2px solid var(--ink)}
+.brand h1{font-size:38px;rotate:-2deg}
+nav.tabs{display:flex;gap:6px;padding:2px}
+nav.tabs a{padding:5px 13px;text-decoration:none;color:var(--ink-2);font-weight:700;font-size:14px;border-radius:var(--wob);border:2px solid transparent;transition:rotate .2s,background .2s,translate .2s}
+nav.tabs a:hover{rotate:-2deg;color:var(--ink)}
+nav.tabs a[aria-current="page"]{background:var(--sun);color:var(--on);border-color:var(--ink);box-shadow:2px 2px 0 var(--ink);rotate:-2deg}
 .stats{display:flex;gap:18px;margin-left:auto;align-items:baseline}
-.stat b{font-family:var(--font-display);font-size:20px;font-weight:800;display:block;line-height:1.1}
-.stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
-.actions{display:flex;gap:8px}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
-.btn:hover{border-color:var(--ink-2)}
-.btn.primary{background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff;border:0;box-shadow:0 6px 18px rgba(255,60,110,.30)}
-.btn.violet{background:var(--wish);color:#fff;border:0}
-.btn.ghost{border-color:transparent;background:transparent}
-.btn.sm{padding:5px 11px;font-size:13px}
+.stat b{font-family:var(--font-display);font-size:30px;font-weight:700;display:block;line-height:.9}
+.stat span{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.actions{display:flex;gap:10px}
+.btn{border:2px solid var(--ink);background:var(--surface);border-radius:var(--wob);padding:7px 15px;font-weight:700;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;box-shadow:3px 3px 0 var(--ink);transition:translate .12s,box-shadow .12s,rotate .2s;text-decoration:none;color:var(--ink)}
+.btn:hover{translate:-1px -1px;box-shadow:4px 4px 0 var(--ink);rotate:-1deg}
+.btn:active{translate:2px 2px;box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--visit);color:var(--on)}
+.btn.violet{background:var(--wish);color:var(--on-wish)}
+.btn.ghost{border-color:transparent;background:transparent;box-shadow:none;text-decoration:underline;text-decoration-style:wavy;text-decoration-color:var(--line);text-underline-offset:4px}
+.btn.ghost:hover{box-shadow:none;text-decoration-color:var(--visit)}
+.btn.sm{padding:4px 11px;font-size:13px;box-shadow:2px 2px 0 var(--ink)}
+.btn.sm.ghost{box-shadow:none}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn svg{width:16px;height:16px}
 
 /* Main */
 main{flex:1;min-height:0;position:relative}
 .view{position:absolute;inset:0}
-.globe-view{display:grid;grid-template-columns:minmax(0,1fr) 420px}
+.view.enter{animation:viewin .4s ease both}
+.globe-view{display:grid;grid-template-columns:minmax(0,1fr) 440px}
 .globe-wrap{position:relative;min-width:0;min-height:0;overflow:hidden;touch-action:none}
 .globe-wrap svg{width:100%;height:100%;display:block;cursor:grab}
 .globe-wrap svg:active{cursor:grabbing}
-.sphere{filter:drop-shadow(0 24px 60px var(--glow))}
-.country{stroke:var(--land-line);stroke-width:.5;transition:fill .5s}
-.country:hover{filter:brightness(1.06);stroke:var(--ink-2)}
-.country.sel{stroke:var(--ink);stroke-width:1.4}
-.grat{fill:none;stroke:var(--ocean-2);stroke-width:.5;opacity:.6}
+.sphere{filter:drop-shadow(0 22px 40px var(--glow));stroke:var(--ink);stroke-width:2.5}
+.country{stroke:var(--land-line);stroke-width:.6;transition:fill .5s}
+.country:hover{filter:brightness(1.06);stroke:var(--ink)}
+.country.sel{stroke:var(--ink);stroke-width:1.6}
+.grat{fill:none;stroke:var(--ocean-2);stroke-width:.6;stroke-dasharray:3 4;opacity:.8}
 .city{cursor:pointer}
-.city .dot{stroke:var(--surface);stroke-width:2}
+.city .dot{stroke:var(--ink);stroke-width:1.5}
 .city.wish .dot{fill:var(--surface);stroke:var(--wish);stroke-width:2.5}
 .city.visited .dot{fill:var(--visit-2)}
 .city .ring{fill:none;stroke:var(--visit-2);stroke-width:2;opacity:0}
 .city.wish .ring{stroke:var(--wish)}
 .city.sel .ring{animation:pulse 1.8s ease-out infinite}
-@keyframes pulse{0%{r:6;opacity:.9}100%{r:22;opacity:0}}
-.city text{font-family:var(--font-display);font-weight:700;font-size:12px;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px;pointer-events:none}
+.city text{font-family:var(--font-display);font-weight:700;font-size:17px;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:4px;pointer-events:none}
 .globe-ui{position:absolute;display:flex;gap:8px;align-items:center}
 .globe-ui.tl{top:14px;left:max(14px,env(safe-area-inset-left,0px));flex-wrap:wrap;right:70px}
 .globe-ui.br{bottom:14px;right:14px;flex-direction:column}
-.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500;color:var(--ink-2)}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
-.zoom-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;box-shadow:var(--shadow)}
-.legend{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;max-width:260px}
+.chip{border:0;background:color-mix(in srgb,var(--sky) 30%,var(--surface));border-radius:2px;padding:5px 13px;font-size:13px;font-weight:700;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12);transition:rotate .2s,translate .2s;clip-path:polygon(0 0,5px 50%,0 100%,100% 100%,calc(100% - 5px) 50%,100% 0)}
+.chip:nth-child(3n+2){background:color-mix(in srgb,var(--sun) 45%,var(--surface));rotate:1deg}
+.chip:nth-child(3n){background:color-mix(in srgb,var(--mint) 30%,var(--surface));rotate:-1deg}
+.chip:hover{translate:0 -2px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);rotate:-2deg}
+.zoom-btn{width:40px;height:40px;border-radius:50%;border:2px solid var(--ink);background:var(--surface);font-size:20px;line-height:1;box-shadow:2px 2px 0 var(--ink)}
+.zoom-btn:active{translate:2px 2px;box-shadow:none}
+.legend{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:16px;background:var(--note-y);color:var(--note-ink);padding:12px 14px;font-size:12px;display:flex;flex-direction:column;gap:6px;max-width:260px;rotate:-2deg;box-shadow:var(--shadow);font-family:var(--font-mono)}
 .legend .row{display:flex;align-items:center;gap:8px}
-.sw{width:14px;height:14px;border-radius:4px;flex:none}
-.ramp{height:10px;border-radius:6px;width:160px}
-.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;font-weight:500;padding:4px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-140%);opacity:0;transition:opacity .15s}
-.pick-banner{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--wish);color:#fff;padding:8px 16px;border-radius:999px;font-weight:500;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;max-width:calc(100% - 32px)}
+.sw{width:14px;height:14px;border-radius:3px;flex:none;border:1.5px solid var(--note-ink)}
+.ramp{height:10px;border-radius:6px;width:150px;border:1.5px solid var(--note-ink)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-140%);opacity:0;transition:opacity .15s}
+.pick-banner{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--wish);color:var(--on-wish);padding:8px 16px;border-radius:var(--wob);border:2px solid var(--ink);font-weight:700;box-shadow:3px 3px 0 var(--ink);display:flex;gap:10px;align-items:center;max-width:calc(100% - 32px)}
 
-/* Panel */
-.panel{background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;min-width:0;padding:22px 22px 120px}
-.panel h2{font-size:28px;font-weight:800;line-height:1.1}
-.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+/* Panel: a page of the notebook */
+.panel{background:var(--surface) linear-gradient(color-mix(in srgb,var(--sky) 13%,transparent) 1px,transparent 1px) 0 0/100% 28px local;border-left:2px solid var(--ink);overflow-y:auto;min-width:0;padding:24px 24px 120px 30px;box-shadow:-8px 0 20px rgba(70,50,20,.08)}
+.panel h2{font-size:50px}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
 .stack{display:flex;flex-direction:column;gap:16px}
-.section{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line);margin-top:4px}
+.section{display:flex;flex-direction:column;gap:12px;padding-top:18px;border-top:2px dashed var(--line);margin-top:4px}
 .section-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.section-h h3{font-size:17px;font-weight:700}
-.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
-.pill.visited{background:color-mix(in srgb,var(--visit-2) 14%,transparent);color:var(--visit-2)}
-.pill.wish{background:color-mix(in srgb,var(--wish) 16%,transparent);color:var(--wish)}
-.back{background:none;border:0;color:var(--ink-2);padding:0;font-weight:500;display:inline-flex;gap:4px;align-items:center}
-.cover{width:100%;aspect-ratio:16/9;max-width:100%;object-fit:cover;border-radius:var(--r)}
-.scorecard{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.score-tile{border-radius:16px;padding:14px;background:var(--surface-2)}
-.score-tile b{font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1;display:block}
-.score-tile span{font-size:12px;color:var(--ink-2)}
-.score-tile.hot{background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff}
-.score-tile.hot span{color:rgba(255,255,255,.85)}
+.section-h h3,.panel-card h3{font-size:30px}
+.section-h h3{background:linear-gradient(transparent 58%,color-mix(in srgb,var(--sun) 70%,transparent) 58% 92%,transparent 92%);padding:0 .15em}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);border:0}
+.pill.visited,.pill.wish{font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em;border:2px solid currentColor;border-radius:5px;background:none;rotate:-3deg;padding:3px 9px 1px}
+.pill.visited{color:var(--visit-2)}
+.pill.wish{color:var(--wish)}
+.enter .pill.visited,.enter .pill.wish,.stamped{animation:stamp .45s cubic-bezier(.3,1.6,.5,1) backwards .25s}
+button.pill{cursor:pointer}button.pill:hover{background:color-mix(in srgb,var(--visit) 20%,var(--surface-2));color:var(--ink)}
+.back{background:none;border:0;color:var(--ink-2);padding:0;font-weight:700;display:inline-flex;gap:4px;align-items:center;align-self:flex-start}
+.back:hover{color:var(--ink)}
+.polaroid{background:var(--photo);color:var(--photo-ink);padding:10px 10px 12px;box-shadow:0 1px 0 rgba(0,0,0,.06),var(--shadow);position:relative;margin:8px 0 0;border-radius:2px}
+.taped::before{content:"";position:absolute;top:-12px;left:50%;width:92px;height:26px;margin-left:-46px;background:var(--tape,var(--sun));opacity:.82;rotate:-3deg;box-shadow:0 1px 2px rgba(0,0,0,.14);z-index:2;clip-path:polygon(0 0,4px 25%,0 50%,4px 75%,0 100%,100% 100%,calc(100% - 4px) 75%,100% 50%,calc(100% - 4px) 25%,100% 0);pointer-events:none}
+.enter .taped::before{animation:tape .4s ease-out backwards .3s}
+.cover-fig{rotate:-1.2deg}
+.cover{width:100%;aspect-ratio:16/10;object-fit:cover;display:block}
+.scorecard{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.score-tile{border-radius:var(--wob);padding:14px 16px;background:var(--surface);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);rotate:1deg}
+.score-tile b{font-family:var(--font-display);font-size:52px;font-weight:700;line-height:.9;display:block}
+.score-tile span{font-size:12px;color:var(--ink-2);font-weight:700}
+.score-tile.hot{background:var(--visit);color:var(--on);rotate:-2deg}
+.score-tile.hot span{color:var(--on)}
 .rate-row{display:grid;grid-template-columns:120px minmax(0,1fr) 28px;align-items:center;gap:10px;font-size:14px}
-.rate-row .lbl{font-weight:500}
+.rate-row .lbl{font-weight:700}
 .segs{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
-.segs button{height:18px;border:0;border-radius:4px;background:var(--surface-2);padding:0}
-.segs button.on{background:var(--c)}
-.segs button:hover{outline:1.5px solid var(--ink-2)}
+.segs button{height:20px;border:1.5px solid color-mix(in srgb,var(--ink) 35%,transparent);border-radius:5px 3px 6px 3px;background:var(--surface);padding:0;transition:translate .1s}
+.segs button.on{background:var(--c);border-color:var(--ink)}
+.segs button:hover{translate:0 -2px;border-color:var(--ink)}
 .rate-row .val{text-align:right;font-weight:700}
-.list{display:flex;flex-direction:column;gap:8px}
-.mem-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:8px;border-radius:14px;border:1px solid var(--line);background:var(--surface);text-align:left;width:100%}
-.mem-row:hover{border-color:var(--ink-2)}
-.thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2);font-family:var(--font-display);font-weight:800;font-size:20px}
-.mem-row .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.mem-row .s{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.list{display:flex;flex-direction:column;gap:9px}
+.mem-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:7px;border-radius:3px;border:0;background:var(--photo);color:var(--photo-ink);text-align:left;width:100%;box-shadow:0 2px 8px rgba(70,50,20,.14);transition:rotate .2s,translate .2s}
+.mem-row:nth-child(odd){rotate:-.5deg}.mem-row:nth-child(even){rotate:.5deg}
+.mem-row:hover{rotate:0deg;translate:0 -2px}
+.thumb{width:56px;height:56px;border-radius:2px;object-fit:cover;background:var(--surface-2);display:grid;place-items:center;font-family:var(--font-display);font-weight:700;font-size:30px}
+.mem-row .t{font-family:var(--font-display);font-weight:700;font-size:23px;line-height:1.05;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-row .s{font-family:var(--font-mono);font-size:11px;color:var(--photo-ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 ul.bul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
-.ai-box{border-radius:16px;padding:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--wish) 12%,transparent),color-mix(in srgb,var(--mint) 12%,transparent));display:flex;flex-direction:column;gap:8px}
+.ai-box,.note{padding:14px 14px 16px;background:var(--note-y);color:var(--note-ink);display:flex;flex-direction:column;gap:8px;box-shadow:0 6px 14px rgba(70,50,20,.16);position:relative;rotate:-.6deg;border-radius:1px 1px 18px 1px/1px 1px 26px 1px}
+.note.p{background:var(--note-p);rotate:.7deg}.note.b{background:var(--note-b);rotate:-.4deg}.note.g{background:var(--note-g)}
+.ai-box .eyebrow,.note .eyebrow,.ai-box .muted,.note .muted{color:color-mix(in srgb,var(--note-ink) 70%,transparent)}
+.note b.h,.ai-box b.h{font-family:var(--font-display);font-size:26px;line-height:1}
 .todo{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:14px}
 .todo input{width:18px;height:18px;accent-color:var(--mint)}
-.todo.done .txt{text-decoration:line-through;color:var(--ink-2)}
-.type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
-.type.sport{background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
-.type.landmark{background:color-mix(in srgb,var(--sun) 25%,transparent);color:color-mix(in srgb,var(--sun) 50%,var(--ink))}
-.type.event{background:color-mix(in srgb,var(--visit-2) 15%,transparent);color:var(--visit-2)}
-.type.food{background:color-mix(in srgb,var(--visit) 15%,transparent);color:var(--visit)}
+.todo.done .txt{text-decoration:line-through;text-decoration-color:var(--visit);text-decoration-thickness:2px;color:var(--ink-2)}
+.type{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px 1px;border-radius:3px;background:var(--surface-2);color:var(--ink-2)}
+.type.sport{background:color-mix(in srgb,var(--mint) 24%,transparent);color:color-mix(in srgb,var(--mint) 55%,var(--ink))}
+.type.landmark{background:color-mix(in srgb,var(--sun) 32%,transparent);color:color-mix(in srgb,var(--sun) 40%,var(--ink))}
+.type.event{background:color-mix(in srgb,var(--visit-2) 18%,transparent);color:color-mix(in srgb,var(--visit-2) 70%,var(--ink))}
+.type.food{background:color-mix(in srgb,var(--visit) 22%,transparent);color:color-mix(in srgb,var(--visit) 60%,var(--ink))}
+.type.nature{background:color-mix(in srgb,var(--mint) 18%,transparent);color:color-mix(in srgb,var(--mint) 50%,var(--ink))}
+.type.experience{background:color-mix(in srgb,var(--wish) 16%,transparent);color:color-mix(in srgb,var(--wish) 70%,var(--ink))}
 .x{border:0;background:none;color:var(--ink-2);font-size:18px;line-height:1;padding:2px 6px}
 .add-row{display:flex;gap:6px}
 .add-row input{flex:1;min-width:0}
-.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;color:var(--ink-2);min-width:0}
-input[type=text],input[type=date],input[type=number],select,textarea{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 12px;font-size:15px;width:100%;color:var(--ink)}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:var(--ink-2);min-width:0}
+input[type=text],input[type=search],input[type=date],input[type=number],input[type=password],select,textarea{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;font-size:15px;width:100%;color:var(--ink);font-weight:400}
+input:focus,select:focus,textarea:focus{border-color:var(--ink);outline:none}
 textarea{resize:vertical;min-height:80px;line-height:1.5}
-.place-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);width:100%;text-align:left}
-.place-row:hover{border-color:var(--ink-2)}
+.place-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--wob);border:2px solid var(--line);background:var(--surface);width:100%;text-align:left;transition:translate .15s,border-color .15s}
+.place-row:hover{border-color:var(--ink);translate:3px 0}
 .place-row .nm{font-weight:700;flex:1;min-width:0}
-.dotc{width:10px;height:10px;border-radius:50%;flex:none}
-.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;align-items:center}
-.banner{background:color-mix(in srgb,var(--sun) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--sun) 50%,transparent);border-radius:14px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.dotc{width:11px;height:11px;border-radius:50%;flex:none;border:1.5px solid var(--ink)}
+.empty{border:2px dashed var(--line);border-radius:var(--wob);padding:24px;text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;align-items:center}
+.empty b{font-family:var(--font-display);font-size:28px;color:var(--ink);line-height:1}
+.banner{background:var(--note-y);color:var(--note-ink);padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;rotate:-.5deg;box-shadow:0 4px 10px rgba(70,50,20,.14)}
+
+/* Passport stamps */
+.stamps{display:flex;flex-wrap:wrap;gap:12px 10px;padding:4px 2px}
+.stamp{font-family:var(--font-mono);text-transform:uppercase;font-size:11px;letter-spacing:.05em;border:2px solid var(--c,var(--visit-2));color:var(--c,var(--visit-2));background:none;border-radius:8px;padding:6px 10px 3px;text-align:center;line-height:1.25;rotate:var(--rot,0deg);outline:1.5px dashed var(--c,var(--visit-2));outline-offset:2px;transition:rotate .2s,scale .2s;max-width:150px}
+.stamp b{display:block;font-size:13px}
+.stamp:hover{rotate:0deg;scale:1.08}
+.stamp:nth-child(4n+1){--rot:-5deg;--c:var(--visit-2)}.stamp:nth-child(4n+2){--rot:3deg;--c:var(--wish);border-radius:50px}.stamp:nth-child(4n+3){--rot:-2deg;--c:color-mix(in srgb,var(--mint) 70%,var(--ink))}.stamp:nth-child(4n){--rot:6deg;--c:color-mix(in srgb,var(--visit) 80%,var(--ink));border-radius:50px}
+
+/* Quick picks */
+.quick{display:flex;flex-direction:column;gap:8px;padding:12px;border:2px dashed var(--line);border-radius:14px;background:color-mix(in srgb,var(--surface-2) 55%,transparent)}
+.quick-chips{display:flex;flex-wrap:wrap;gap:7px}
+.qp{border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:4px 11px 4px 8px;font-size:13px;font-weight:700;display:inline-flex;gap:6px;align-items:center;text-align:left;transition:translate .12s,background .15s,scale .2s,opacity .2s;max-width:100%}
+.qp i{font-style:normal;width:18px;height:18px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;font-size:13px;line-height:1;flex:none}
+.qp:hover{translate:0 -2px;background:var(--note-g)}.qp:hover i{background:var(--mint);color:#fff}
+.qp.gone{scale:.6;opacity:0}
+.qp.landmark i{background:color-mix(in srgb,var(--sun) 60%,var(--surface))}.qp.sport i{background:color-mix(in srgb,var(--mint) 45%,var(--surface))}.qp.food i{background:color-mix(in srgb,var(--visit) 45%,var(--surface))}.qp.nature i{background:color-mix(in srgb,var(--mint) 30%,var(--surface))}.qp.event i{background:color-mix(in srgb,var(--visit-2) 35%,var(--surface))}.qp.experience i{background:color-mix(in srgb,var(--wish) 30%,var(--surface))}
 
 /* Full-page views */
 .page{overflow-y:auto;padding-block:28px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.page-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.page-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
 .page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
-.page-h h2{font-size:40px;font-weight:800;line-height:1}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-.year-h{font-family:var(--font-display);font-size:30px;font-weight:800;color:var(--ink-2);margin-top:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
-.card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
-.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
-.card .ph{aspect-ratio:4/3;width:100%;object-fit:cover;background:var(--surface-2)}
-.card .ph.none{display:grid;place-items:center;font-family:var(--font-display);font-size:44px;font-weight:800;color:#fff}
-.card .body{padding:14px;display:flex;flex-direction:column;gap:6px}
-.card .t{font-family:var(--font-display);font-weight:700;font-size:18px;line-height:1.2}
-.card .meta{font-size:13px;color:var(--ink-2)}
-.otd{border-radius:var(--r);padding:18px;background:linear-gradient(120deg,var(--sun),var(--visit));color:#2a1200;display:flex;gap:16px;align-items:center;text-align:left;border:0}
-.otd img{width:84px;height:84px;border-radius:14px;object-fit:cover}
-.rank-list{display:flex;flex-direction:column;gap:8px}
-.rank{display:grid;grid-template-columns:44px minmax(0,1.2fr) minmax(0,2fr) 48px;gap:12px;align-items:center;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-align:left;width:100%}
-.rank .n{font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--ink-2)}
-.rank:nth-child(1) .n{color:var(--sun)}.rank:nth-child(2) .n{color:var(--ink-2)}.rank:nth-child(3) .n{color:var(--visit)}
-.bar{height:12px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.page-h h2{font-size:72px;rotate:-1.5deg;transform-origin:left bottom}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.year-h{font-family:var(--font-display);font-size:48px;font-weight:700;color:var(--ink);margin-top:10px;line-height:1;align-self:flex-start;background:linear-gradient(transparent 58%,color-mix(in srgb,var(--mint) 45%,transparent) 58% 92%,transparent 92%);padding:0 .15em}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:30px 26px;padding-top:6px}
+.card{border:0;background:var(--photo);color:var(--photo-ink);border-radius:2px;text-align:left;padding:10px 10px 6px;display:flex;flex-direction:column;position:relative;box-shadow:0 1px 0 rgba(0,0,0,.06),var(--shadow);rotate:var(--rot,0deg);transition:rotate .25s,translate .25s,scale .25s,box-shadow .25s}
+.card:hover{rotate:0deg;translate:0 -5px;scale:1.03;z-index:3;box-shadow:0 18px 34px rgba(70,50,20,.26)}
+.grid>:nth-child(4n+1),.tl-grid>:nth-child(4n+1){--rot:-1.6deg;--tape:var(--sun)}
+.grid>:nth-child(4n+2),.tl-grid>:nth-child(4n+2){--rot:1.1deg;--tape:var(--mint)}
+.grid>:nth-child(4n+3),.tl-grid>:nth-child(4n+3){--rot:-.7deg;--tape:var(--visit-2)}
+.grid>:nth-child(4n),.tl-grid>:nth-child(4n){--rot:1.8deg;--tape:var(--sky)}
+.card .ph{aspect-ratio:1/1;width:100%;object-fit:cover;background:var(--surface-2);display:block}
+.card .ph.none{display:grid;place-items:center;font-family:var(--font-display);font-size:84px;font-weight:700;color:#fff}
+.card .body{padding:10px 4px 6px;display:flex;flex-direction:column;gap:4px}
+.card .t{font-family:var(--font-display);font-weight:700;font-size:27px;line-height:1}
+.card .meta{font-size:13px;color:var(--photo-ink-2)}
+.card .meta.k{font-family:var(--font-mono);font-size:11px}
+.otd{padding:16px 18px;background:var(--sun);color:var(--on);display:flex;gap:16px;align-items:center;text-align:left;border:2px solid var(--ink);border-radius:var(--wob);box-shadow:4px 4px 0 var(--ink);rotate:-.6deg}
+.otd h3{font-size:34px}
+.otd img{width:84px;height:84px;object-fit:cover;border:5px solid #fff;rotate:-4deg;box-shadow:var(--shadow)}
+.search{max-width:320px;border-radius:var(--wob)!important}
+.rank-list{display:flex;flex-direction:column;gap:10px}
+.rank{display:grid;grid-template-columns:44px minmax(0,1.2fr) minmax(0,2fr) 48px;gap:12px;align-items:center;padding:10px 14px;border-radius:var(--wob);background:var(--surface);border:2px solid var(--line);text-align:left;width:100%;transition:translate .15s,border-color .15s}
+.rank:hover{border-color:var(--ink);translate:4px 0}
+.rank .n{font-family:var(--font-display);font-weight:700;font-size:38px;color:var(--ink-2);line-height:.9}
+.rank:nth-child(1){border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);background:color-mix(in srgb,var(--sun) 22%,var(--surface))}
+.rank:nth-child(1) .n{color:var(--ink)}
+.bar{height:14px;border-radius:8px;background:var(--surface-2);overflow:hidden;border:1.5px solid color-mix(in srgb,var(--ink) 30%,transparent)}
 .bar i{display:block;height:100%;border-radius:6px}
-.rank .v{font-family:var(--font-display);font-weight:800;font-size:20px;text-align:right}
+.enter .bar i{animation:grow .7s cubic-bezier(.2,.8,.3,1) backwards .15s;transform-origin:left}
+.rank .v{font-family:var(--font-display);font-weight:700;font-size:34px;text-align:right;line-height:.9}
 .h2h{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .h2h-row{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);gap:10px;align-items:center;font-size:14px}
 .h2h-row .l .bar{direction:rtl}
-.h2h-row .c{text-align:center;font-weight:500;color:var(--ink-2)}
-.panel-card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px}
-.wish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
-.wish-card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.wish-card h3{font-size:24px;font-weight:800}
+.h2h-row .c{text-align:center;font-weight:700;color:var(--ink-2)}
+.panel-card{border:2px solid var(--ink);background:var(--surface);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:14px;box-shadow:4px 4px 0 var(--ink)}
+.wish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:26px}
+.wish-card{border:0;background:var(--surface);padding:22px 18px 18px;display:flex;flex-direction:column;gap:12px;min-width:0;box-shadow:var(--shadow);position:relative;border-radius:2px;border-top:10px solid var(--wish)}
+.wish-card:nth-child(3n+2){border-top-color:var(--mint)}.wish-card:nth-child(3n){border-top-color:var(--visit-2)}
+.wish-card h3{font-size:40px}
 .sugg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--surface-2);font-size:14px}
 
+/* Timeline */
+.tl-wrap{display:grid;grid-template-columns:270px minmax(0,1fr);gap:36px;max-width:1120px;margin:0 auto}
+.tl-side{position:sticky;top:0;align-self:start;display:flex;flex-direction:column;gap:14px;z-index:4}
+.tl-globe{position:relative;width:230px;height:230px;margin:0 auto}
+.tl-globe canvas{width:100%;height:100%;display:block;border-radius:50%;border:2.5px solid var(--ink);box-shadow:0 14px 26px var(--glow)}
+.tl-big{position:absolute;right:-14px;bottom:-6px;background:var(--sun);color:var(--on);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);font-family:var(--font-display);font-weight:700;font-size:40px;line-height:1;padding:2px 12px;rotate:-6deg;border-radius:var(--wob)}
+.tl-big.tick{animation:stamp .4s cubic-bezier(.3,1.6,.5,1)}
+.tl-years{position:relative;display:flex;flex-direction:column;gap:2px;max-height:calc(100vh - 480px);min-height:90px;overflow:auto;padding:4px}
+.tl-years button{border:0;background:none;display:flex;align-items:center;gap:10px;padding:3px 10px;font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--ink-2);border-radius:var(--wob);text-align:left;line-height:1.05;transition:translate .15s}
+.tl-years button span{font-family:var(--font-mono);font-size:10px;font-weight:400;margin-left:auto}
+.tl-years button:hover{color:var(--ink);translate:3px 0}
+.tl-years button[aria-current="true"]{background:var(--ink);color:var(--surface);rotate:-1.5deg}
+.tl-ctl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.tl-main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.tl-line{border-left:3px dashed var(--line);margin-left:10px;padding-left:28px;display:flex;flex-direction:column;gap:44px;padding-bottom:40vh}
+.tl-year{position:relative;display:flex;flex-direction:column;gap:12px;scroll-margin-top:12px}
+.tl-year::before{content:"";position:absolute;left:-41px;top:14px;width:22px;height:22px;border-radius:50%;background:var(--visit);border:2.5px solid var(--ink);transition:scale .3s,background .3s}
+.tl-year.on::before{scale:1.35;background:var(--sun)}
+.tl-yh{font-size:92px;line-height:.8;align-self:flex-start;transition:color .3s;color:var(--ink-2)}
+.tl-year.on .tl-yh{color:var(--ink)}
+.tl-stats{font-family:var(--font-mono);font-size:12px;color:var(--ink-2);margin:0;text-transform:uppercase;letter-spacing:.05em}
+.tl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:30px 24px;padding-top:10px}
+.tl-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+.tl-card .card{width:100%}
+.tl-mem{border:0;background:var(--note-y);color:var(--note-ink);text-align:left;padding:6px 10px;font-family:var(--font-display);font-size:20px;line-height:1.05;font-weight:700;box-shadow:0 3px 8px rgba(70,50,20,.14);rotate:.6deg;transition:rotate .2s,translate .2s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-mem:nth-child(odd){background:var(--note-b);rotate:-.8deg}
+.tl-mem:hover{rotate:0deg;translate:0 -2px}
+
 /* Modal */
-.overlay{position:fixed;inset:0;background:rgba(8,12,30,.5);display:grid;place-items:center;z-index:50;padding:16px;backdrop-filter:blur(4px)}
-.modal{background:var(--surface);border-radius:24px;width:min(680px,100%);max-height:calc(100% - 20px);overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
-.modal h2{font-size:26px;font-weight:800}
-.modal .foot{display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:-24px;background:var(--surface);padding:12px 0 4px;margin-bottom:-4px}
+.overlay{position:fixed;inset:0;background:rgba(30,22,40,.55);display:grid;place-items:center;z-index:50;padding:16px;backdrop-filter:blur(3px);animation:fade .2s ease both}
+.modal{background:var(--surface);border-radius:4px;border:2px solid var(--ink);width:min(720px,100%);max-height:calc(100% - 20px);overflow-y:auto;padding:26px 24px 24px;display:flex;flex-direction:column;gap:16px;box-shadow:8px 8px 0 rgba(20,14,30,.5);animation:dropin .4s cubic-bezier(.2,.9,.3,1.15) both}
+.modal h2{font-size:46px}
+.modal .foot{display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:-24px;background:var(--surface);padding:14px 4px 8px;margin-bottom:-4px;border-top:2px dashed var(--line);z-index:3}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mic-zone{display:flex;gap:16px;align-items:center;padding:16px;border-radius:18px;background:var(--surface-2)}
-.mic{width:64px;height:64px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 8px 24px rgba(255,50,110,.35);position:relative}
+.mic-zone{display:flex;gap:16px;align-items:center;padding:16px;border-radius:14px;background:var(--surface-2);border:2px dashed var(--line)}
+.mic{width:68px;height:68px;border-radius:50%;border:2.5px solid var(--ink);background:var(--visit);color:var(--on);display:grid;place-items:center;flex:none;box-shadow:3px 3px 0 var(--ink);position:relative;transition:translate .12s,box-shadow .12s}
+.mic:active{translate:2px 2px;box-shadow:1px 1px 0 var(--ink)}
 .mic svg{width:28px;height:28px}
-.mic.live::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--visit-2);animation:ring 1.2s ease-out infinite}
-@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.3);opacity:0}}
+.mic.live{background:var(--visit-2);color:#fff}
+.mic.live::before,.mic.live::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:3px solid var(--visit-2);animation:ring 1.4s ease-out infinite}
+.mic.live::after{animation-delay:.7s}
+.wave{display:inline-flex;gap:3px;align-items:center;height:18px;margin-left:8px;vertical-align:middle}
+.wave i{width:4px;border-radius:2px;background:var(--visit-2);height:100%;animation:wave .9s ease-in-out infinite;transform-origin:center}
+.wave i:nth-child(2){animation-delay:.15s}.wave i:nth-child(3){animation-delay:.3s}.wave i:nth-child(4){animation-delay:.45s}.wave i:nth-child(5){animation-delay:.6s}
+.prompt{font-family:var(--font-display);font-size:24px;line-height:1.1;color:var(--ink);min-height:1.1em}
+.prompt.swap{animation:rise .35s ease backwards}
+.cover-list{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.cv{border:2px dashed var(--line);background:none;border-radius:999px;padding:3px 11px;font-size:13px;font-weight:700;color:var(--ink-2);display:inline-flex;gap:6px;align-items:center;transition:background .25s,border-color .25s,color .25s}
+.cv i{font-style:normal;width:16px;height:16px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-size:11px;line-height:1}
+.cv:hover{border-color:var(--ink);color:var(--ink)}
+.cv.ok{background:var(--note-g);border:2px solid var(--ink);color:var(--note-ink)}
+.cv.ok i{background:var(--mint);border-color:var(--ink);color:#fff;animation:pop .35s cubic-bezier(.3,1.8,.5,1)}
 .partial{font-style:italic;color:var(--ink-2);font-size:14px;min-height:1.5em}
-.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
-.photos .ph-item{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.board{display:flex;flex-direction:column;gap:14px;padding:16px;border:2px solid var(--ink);border-radius:12px;background:color-mix(in srgb,var(--surface-2) 45%,var(--surface));position:relative}
+.board-h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.board-h h3{font-size:34px}
+.board-h .muted{font-size:13px;flex:1;min-width:120px}
+.notes3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.note ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.note li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px;align-items:start}
+.note li.new{animation:rise .3s ease backwards}
+.note textarea{background:none;border:0;border-bottom:1.5px dashed color-mix(in srgb,var(--note-ink) 35%,transparent);border-radius:0;padding:3px 2px;font-size:14px;line-height:1.35;color:var(--note-ink);min-height:0;resize:none;field-sizing:content;font-weight:500}
+.note textarea:focus{border-bottom-style:solid;border-bottom-color:var(--note-ink)}
+.note .x{color:color-mix(in srgb,var(--note-ink) 60%,transparent)}
+.note-add{border:0;background:none;color:color-mix(in srgb,var(--note-ink) 70%,transparent);font-weight:700;font-size:13px;text-align:left;padding:2px}
+.note-add:hover{color:var(--note-ink)}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:10px}
+.photos .ph-item{position:relative;aspect-ratio:1;overflow:hidden;background:var(--photo);border:5px solid var(--photo);box-shadow:0 3px 8px rgba(70,50,20,.2)}
+.photos .ph-item:nth-child(odd){rotate:-2deg}.photos .ph-item:nth-child(even){rotate:1.5deg}
 .photos .ph-item img{width:100%;height:100%;object-fit:cover}
-.photos .ph-item button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;line-height:1}
-.photo-add{aspect-ratio:1;border-radius:12px;border:1.5px dashed var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:13px;text-align:center;cursor:pointer;padding:6px}
-.tagbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
-.tagbtn[aria-pressed="true"]{background:var(--mint);color:#fff;border-color:var(--mint)}
-.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
-.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:zoom-in}
-.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:60;display:grid;place-items:center;padding:20px}
-.lightbox img{max-width:100%;max-height:100%;border-radius:12px}
-.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:500;z-index:70;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
+.photos .ph-item button{position:absolute;top:2px;right:2px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;line-height:1}
+.photo-add{aspect-ratio:1;border-radius:10px;border:2px dashed var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:13px;font-weight:700;text-align:center;cursor:pointer;padding:6px}
+.photo-add:hover{border-color:var(--ink);color:var(--ink)}
+.tagbtn{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;transition:rotate .15s}
+.tagbtn[aria-pressed="true"]{background:var(--mint);color:var(--on);border-color:var(--ink);rotate:-2deg}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px;padding:6px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;cursor:zoom-in;border:7px solid var(--photo);border-bottom-width:20px;box-shadow:var(--shadow);transition:rotate .2s,scale .2s}
+.gallery img:nth-child(odd){rotate:-2deg}.gallery img:nth-child(even){rotate:1.6deg}
+.gallery img:hover{rotate:0deg;scale:1.04}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:60;display:grid;place-items:center;padding:20px;animation:fade .2s both}
+.lightbox img{max-width:100%;max-height:100%;border:10px solid #fff;border-bottom-width:34px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));translate:-50% 0;background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:var(--wob);font-weight:700;z-index:70;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center;animation:toastin .35s cubic-bezier(.2,.9,.3,1.3) both}
 .spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block}
+#sync-pill{cursor:pointer}#sync-pill[data-st=ok]{background:var(--note-g);color:var(--note-ink)}#sync-pill[data-st=error],#sync-pill[data-st=auth]{background:var(--note-p);color:var(--note-ink)}
+.seg-toggle{display:inline-flex;border:2px solid var(--ink);border-radius:var(--wob);padding:2px;background:var(--surface);align-self:flex-start}
+.seg-toggle button{border:0;background:none;border-radius:var(--wob);padding:5px 14px;font-weight:700;color:var(--ink-2)}
+.seg-toggle button[aria-pressed="true"]{background:var(--sun);color:var(--on)}
+.confetti{position:fixed;left:0;top:0;width:10px;height:14px;z-index:80;pointer-events:none;animation:confetti var(--d,1.4s) cubic-bezier(.2,.6,.4,1) forwards}
+
+/* Arriving on a page: things land one after another */
+.enter :is(.card,.section,.rank,.wish-card,.tl-year,.stamp,.panel-card,.otd,.cover-fig,.scorecard){animation:rise .5s cubic-bezier(.2,.8,.3,1.15) backwards}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(2){animation-delay:.06s}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(3){animation-delay:.12s}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(4){animation-delay:.18s}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(5){animation-delay:.24s}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(6){animation-delay:.3s}
+.enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(n+7){animation-delay:.36s}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.96)}}
+@keyframes viewin{from{opacity:0;transform:translateY(8px)}}
+@keyframes fade{from{opacity:0}}
+@keyframes dropin{from{opacity:0;transform:translateY(-30px) rotate(-3deg) scale(.96)}}
+@keyframes toastin{from{opacity:0;transform:translateY(20px) rotate(3deg)}}
+@keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(8deg)}}
+@keyframes tape{from{opacity:0;transform:translateY(-10px) scaleX(.3)}}
+@keyframes grow{from{transform:scaleX(0)}}
+@keyframes pop{from{transform:scale(0)}}
+@keyframes bob{50%{transform:rotate(180deg)}}
+@keyframes pulse{0%{r:6;opacity:.9}100%{r:22;opacity:0}}
+@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
+@keyframes wave{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
 @keyframes spin{to{transform:rotate(360deg)}}
-#sync-pill{cursor:pointer}#sync-pill[data-st=ok]{color:var(--mint);border-color:var(--mint)}#sync-pill[data-st=error],#sync-pill[data-st=auth]{color:var(--visit);border-color:var(--visit)}
-.seg-toggle{display:inline-flex;background:var(--surface-2);border-radius:999px;padding:3px}
-.seg-toggle button{border:0;background:none;border-radius:999px;padding:6px 14px;font-weight:500;color:var(--ink-2)}
-.seg-toggle button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+@keyframes confetti{from{transform:translate(var(--x0),var(--y0)) rotate(0)}to{transform:translate(var(--x1),var(--y1)) rotate(var(--rz));opacity:0}}
 
 @media (max-width:900px){
   .stats{display:none}
-  .globe-view{grid-template-columns:1fr;grid-template-rows:52% 48%}
-  .panel{border-left:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px))}
-  nav.tabs{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:40;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .globe-view{grid-template-columns:1fr;grid-template-rows:50% 50%}
+  .panel{border-left:0;border-top:2px solid var(--ink);border-radius:22px 22px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px));box-shadow:0 -8px 20px rgba(70,50,20,.1)}
+  .panel h2{font-size:42px}
+  nav.tabs{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:50%;translate:-50% 0;z-index:40;box-shadow:3px 3px 0 var(--ink);border:2px solid var(--ink);background:var(--surface);border-radius:999px;padding:4px 6px;gap:2px;max-width:calc(100% - 16px);overflow-x:auto}
+  nav.tabs a{padding:5px 7px;font-size:12.5px}
+  nav.tabs a[aria-current="page"]{box-shadow:none}
+  header.top{gap:8px;flex-wrap:nowrap}
+  .brand{gap:7px;min-width:0}
+  .brand h1{font-size:28px}
+  .brand-mark{width:30px;height:30px}
+  .actions{gap:8px}
+  .actions .btn{padding:6px 10px}
   .actions{margin-left:auto}
   .actions .btn .lbl{display:none}
   .legend{display:none}
-  .page-h h2{font-size:32px}
+  .page-h h2{font-size:54px}
   .rank{grid-template-columns:34px minmax(0,1fr) 44px}
   .rank .bar{grid-column:2/3;grid-row:2}
   .row2{grid-template-columns:1fr}
+  .notes3{grid-template-columns:1fr}
   .wish-grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px 16px}
+  .card .t{font-size:23px}
   .h2h-row{grid-template-columns:minmax(0,1fr) 84px minmax(0,1fr);font-size:12px}
-  .modal{padding:18px;border-radius:20px}
+  .modal{padding:20px 16px 18px}
+  .modal h2{font-size:40px}
+  .tl-wrap{grid-template-columns:1fr;gap:10px}
+  .tl-side{flex-direction:row;align-items:center;gap:12px;background:var(--bg);margin:-28px -16px 0;padding:10px 16px;border-bottom:2px dashed var(--line)}
+  .tl-globe{width:84px;height:84px;margin:0;flex:none}
+  .tl-big{font-size:22px;right:-10px;bottom:-8px;padding:1px 8px;box-shadow:2px 2px 0 var(--ink)}
+  .tl-years{flex-direction:row;max-height:none;min-height:0;flex:1;min-width:0;overflow-x:auto;gap:4px}
+  .tl-years button{font-size:24px;white-space:nowrap}
+  .tl-years button span{display:none}
+  .tl-ctl{flex:none;flex-direction:column;gap:6px}
+  .tl-ctl .btn .lbl{display:none}
+  .tl-yh{font-size:72px}
+  .tl-year{scroll-margin-top:124px}
+  .tl-line{margin-left:8px;padding-left:22px}
+  .tl-year::before{left:-35px}
+  .tl-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px 14px}
 }
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -237,6 +406,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
     <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h1>Wonderbook</h1></div>
     <nav class="tabs" aria-label="Sections">
       <a href="#globe" data-tab="globe">Globe</a>
+      <a href="#timeline" data-tab="timeline">Timeline</a>
       <a href="#journal" data-tab="journal">Journal</a>
       <a href="#rankings" data-tab="rankings">Rankings</a>
       <a href="#wishlist" data-tab="wishlist">Wishlist</a>
@@ -264,6 +434,7 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
       </div>
       <aside class="panel" id="panel" aria-live="polite"></aside>
     </section>
+    <section class="view page" id="v-timeline" hidden></section>
     <section class="view page" id="v-journal" hidden></section>
     <section class="view page" id="v-rankings" hidden></section>
     <section class="view page" id="v-wishlist" hidden></section>
@@ -296,7 +467,7 @@ const WORLD=195;
 const S={places:[],memories:[],db:null,assets:null,sample:null,dict:null,user:null,
   loaded:{p:false,m:false},dbState:'loading',view:'globe',sel:null,mode:'visited',
   journalFilter:'All',rankCat:'overall',rankBy:'cities',h2h:[null,null],
-  suggestions:{},dictTarget:null,pick:null};
+  suggestions:{},dictTarget:null,pick:null,journalQ:'',recs:{},recsOpen:{},tlOrder:'asc',panelKey:''};
 
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
@@ -410,6 +581,7 @@ $('#globe').addEventListener('click',ev=>{if(!S.pick||ev.target.closest('.countr
 function selectPlace(id,fly){const p=place(id);if(!p)return;S.sel={type:'place',id};if(S.view!=='globe')go('globe');if(fly&&typeof p.lat==='number')flyTo(p.lng,p.lat,Math.max(G.k,p.kind==='country'?2:3.4));renderPanel();render();$('#panel').scrollTop=0}
 function renderPanel(){const el=$('#panel');
   if(S.dbState!=='ready'){el.innerHTML=dbStateHTML();return}
+  const key=S.sel?S.sel.type+':'+S.sel.id:'home';if(key!==S.panelKey){S.panelKey=key;enter(el)}
   if(S.sel?.type==='place'&&place(S.sel.id))el.innerHTML=placeHTML(place(S.sel.id));
   else if(S.sel?.type==='country')el.innerHTML=countryHTML(S.sel);
   else el.innerHTML=overviewHTML()}
@@ -423,6 +595,7 @@ function overviewHTML(){
   const recent=[...S.memories].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,4);
   if(!S.places.length)return`<div class="stack"><span class="eyebrow">Welcome</span><h2>Start your Wonderbook</h2><p class="muted">Add the first place you’ve been. It lights up on the globe, and you can add memories, photos and ratings to it.</p><div class="empty"><b>No places yet</b><button class="btn primary" data-act="add-place">Add your first place</button></div></div>`;
   return`<div class="stack">${exampleBanner()}<div><span class="eyebrow">Your world</span><h2>${(n=>n+(n===1?' country':' countries'))(countryCount())}, ${(n=>n+(n===1?' city':' cities'))(v.filter(p=>p.kind!=='country').length)}</h2><p class="muted">Spin the globe, tap a country or a pin to open its page.</p></div>
+  ${stampsHTML()}
   <div class="section"><div class="section-h"><h3>Top rated</h3><a class="btn sm ghost" href="#rankings">All rankings</a></div><div class="list">${top.length?top.map((p,i)=>placeRow(p,`<span class="mono" style="font-weight:700">${f1(overall(p))}</span>`)).join(''):'<p class="muted">Rate a place to see it here.</p>'}</div></div>
   <div class="section"><div class="section-h"><h3>Latest memories</h3><a class="btn sm ghost" href="#journal">Journal</a></div><div class="list">${recent.length?recent.map(memRow).join(''):'<p class="muted">No memories yet. Tap “New memory” and talk about a trip.</p>'}</div></div>
   <div class="section"><div class="section-h"><h3>Want to go</h3><a class="btn sm ghost" href="#wishlist">Wishlist</a></div><div class="list">${w.length?w.slice(0,5).map(p=>placeRow(p,'')).join(''):'<p class="muted">Nothing on your wishlist yet.</p>'}</div></div></div>`}
@@ -436,15 +609,15 @@ function countryHTML(sel){const ps=S.places.filter(p=>p.countryId===sel.id);cons
 function ratingsHTML(p){return CATS.map(c=>{const v=p.ratings?.[c.k];return`<div class="rate-row"><span class="lbl">${c.label}</span><div class="segs" role="group" aria-label="${c.label}">${Array.from({length:10},(_,i)=>`<button class="${typeof v==='number'&&i<v?'on':''}" style="--c:${rateColor(v||1)}" data-act="rate" data-id="${p.id}" data-k="${c.k}" data-v="${i+1}" aria-label="${c.label} ${i+1} out of 10"></button>`).join('')}</div><span class="val mono">${v??'–'}</span></div>`}).join('')}
 function todoHTML(p){const items=p.todo||[];return`<div class="list">${items.map(t=>`<label class="todo ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} data-act="todo-toggle" data-id="${p.id}" data-tid="${t.id}"><span class="txt">${esc(t.text)}</span><span class="type ${t.type}">${esc(t.type)}</span><button class="x" data-act="todo-del" data-id="${p.id}" data-tid="${t.id}" aria-label="Remove">×</button></label>`).join('')||'<p class="muted" style="margin:0">Nothing here yet.</p>'}</div>
   <form class="add-row" data-form="todo" data-id="${p.id}"><input type="text" name="text" placeholder="A landmark, team, event, or thing to do" aria-label="New item"><select name="type" aria-label="Type" style="width:auto">${TODO_TYPES.map(t=>`<option>${t}</option>`).join('')}</select><button class="btn sm" type="submit">Add</button></form>
-  ${suggHTML(p)}`}
+  ${recsHTML(p)}${suggHTML(p)}`}
 function suggHTML(p){const s=S.suggestions[p.id];if(s==='loading')return`<p class="muted"><span class="spinner"></span> Finding the best things to do…</p>`;
   if(Array.isArray(s))return`<div class="list">${s.map((it,i)=>`<div class="sugg"><span><b>${esc(it.name)}</b> <span class="type ${esc(it.type)}">${esc(it.type)}</span><br><span class="muted" style="font-size:13px">${esc(it.note||'')}</span></span><button class="btn sm" data-act="sugg-add" data-id="${p.id}" data-i="${i}">Add</button></div>`).join('')}</div>`;
-  return B.hasAI()?`<button class="btn sm" style="align-self:flex-start" data-act="suggest" data-id="${p.id}">${ICON.spark} Suggest things to do</button>`:''}
+  return B.hasAI()?`<button class="btn sm" style="align-self:flex-start" data-act="suggest" data-id="${p.id}">${ICON.spark} Ask Claude for more ideas</button>`:''}
 function placeHTML(p){const ms=memsOf(p.id);const o=overall(p);const cover=p.coverId||ms.find(m=>m.photos?.length)?.photos[0];const visited=p.status==='visited';
   return`<div class="stack">${p.example?exampleBanner():''}<button class="back" data-act="home">‹ Your world</button>
-  ${cover?`<img class="cover" src="${blob(cover)}" alt="">`:''}
+  ${cover?`<figure class="polaroid taped cover-fig"><img class="cover" src="${blob(cover)}" alt=""></figure>`:''}
   <div><span class="eyebrow">${esc(p.kind==='country'?'Country':p.country)}</span><h2>${esc(p.name)}</h2>
-  <p style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0">${visited?'<span class="pill visited">Been there</span>':'<span class="pill wish">Want to go</span>'}${(p.years||[]).sort().map(y=>`<span class="pill mono">${esc(y)}</span>`).join('')}${visited?`<button class="btn sm ghost" data-act="add-year" data-id="${p.id}">+ year</button>`:''}</p></div>
+  <p style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0">${visited?'<span class="pill visited">Been there</span>':'<span class="pill wish">Want to go</span>'}${[...(p.years||[])].sort().map(y=>`<button class="pill mono" data-act="del-year" data-id="${p.id}" data-y="${esc(y)}" title="Tap to remove this year">${esc(y)}</button>`).join('')}${visited?`<button class="btn sm ghost" data-act="add-year" data-id="${p.id}">+ year</button>`:''}</p></div>
   ${visited?`<div class="scorecard"><div class="score-tile hot"><b class="mono">${f1(o)}</b><span>Overall</span></div><div class="score-tile"><b class="mono">${f1(p.ratings?.live)}</b><span>Could I live here?</span></div></div>`:`<button class="btn primary" data-act="mark-visited" data-id="${p.id}">I went! Move to Been there</button>`}
   <div class="section"><div class="section-h"><h3>Memories</h3><button class="btn sm primary" data-act="new-memory" data-id="${p.id}">+ Memory</button></div>
   <div class="list">${ms.length?ms.map(memRow).join(''):`<div class="empty">Tap the mic and talk about ${esc(p.name)}. Wonderbook turns it into a journal entry.<button class="btn sm primary" data-act="new-memory" data-id="${p.id}">${ICON.mic} Record a memory</button></div>`}</div></div>
@@ -458,16 +631,21 @@ function renderStats(){const v=S.places.filter(p=>p.status==='visited');const c=
   $('#stats').innerHTML=[[c,'countries'],[v.filter(p=>p.kind!=='country').length,'cities'],[Math.round(c/WORLD*100)+'%','of the world'],[S.memories.length,'memories']].map(([a,b])=>`<div class="stat"><b class="mono">${a}</b><span>${b}</span></div>`).join('')}
 
 /* ---------- journal ---------- */
-function renderJournal(){const el=$('#v-journal');
-  let ms=[...S.memories].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+function journalList(){let ms=[...S.memories].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
   const f=S.journalFilter;if(f==='Favourites')ms=ms.filter(m=>m.favorite);else if(f!=='All')ms=ms.filter(m=>(m.tags||[]).includes(f));
-  const md=today().slice(5);const otd=S.memories.find(m=>m.date&&m.date.slice(5)===md&&m.date.slice(0,4)<today().slice(0,4));
+  const q=S.journalQ.trim().toLowerCase();if(q)ms=ms.filter(m=>{const p=place(m.placeId);return[m.title,m.body,m.transcript,p?.name,p?.country,...(m.highlights||[]),...(m.lows||[]),...(m.takeaways||[])].join(' ').toLowerCase().includes(q)});
   const byYear=d3.groups(ms,m=>(m.date||'').slice(0,4)||'Undated');
-  el.innerHTML=`<div class="page-inner">${exampleBanner()}<div class="page-h"><div><span class="eyebrow">${S.memories.length} memories</span><h2>Journal</h2></div><button class="btn primary" data-act="new-memory">${ICON.mic} New memory</button></div>
-  ${otd?`<button class="otd" data-act="open-memory" data-id="${otd.id}">${otd.photos?.length?`<img src="${blob(otd.photos[0])}" alt="">`:''}<span><span class="eyebrow" style="color:inherit">On this day, ${otd.date.slice(0,4)}</span><h3 style="font-size:22px">${esc(otd.title)}</h3><span>${esc(place(otd.placeId)?.name||'')}</span></span></button>`:''}
+  if(byYear.length)return byYear.map(([y,arr])=>`<div class="year-h">${esc(y)}</div><div class="grid">${arr.map(memCard).join('')}</div>`).join('');
+  return S.memories.length?`<div class="empty"><b>Nothing matches</b>Try another word or filter.</div>`:`<div class="empty"><b>No memories here yet</b>Talk about a trip and Wonderbook writes it up for you.<button class="btn primary" data-act="new-memory">${ICON.mic} Record a memory</button></div>`}
+function renderJournal(){const el=$('#v-journal');const f=S.journalFilter;
+  const md=today().slice(5);const otd=S.memories.find(m=>m.date&&m.date.slice(5)===md&&m.date.slice(0,4)<today().slice(0,4));
+  el.innerHTML=`<div class="page-inner">${exampleBanner()}<div class="page-h"><div><span class="eyebrow">${S.memories.length} memories</span><h2>Journal</h2></div><div style="display:flex;gap:10px;flex-wrap:wrap">${S.memories.length>1?`<button class="btn" data-act="shuffle">${ICON.spark} Surprise me</button>`:''}<button class="btn primary" data-act="new-memory">${ICON.mic} New memory</button></div></div>
+  ${otd?`<button class="otd" data-act="open-memory" data-id="${otd.id}">${otd.photos?.length?`<img src="${blob(otd.photos[0])}" alt="">`:''}<span><span class="eyebrow" style="color:inherit">On this day, ${otd.date.slice(0,4)}</span><h3>${esc(otd.title)}</h3><span>${esc(place(otd.placeId)?.name||'')}</span></span></button>`:''}
+  ${S.memories.length>3?`<input type="search" class="search" data-in="jq" placeholder="Search your memories" value="${esc(S.journalQ)}" aria-label="Search your memories">`:''}
   <div class="chips">${['All','Favourites',...TAGS].map(t=>`<button class="chip" data-act="jfilter" data-f="${esc(t)}" aria-pressed="${f===t}">${esc(t)}</button>`).join('')}</div>
-  ${byYear.length?byYear.map(([y,arr])=>`<div class="year-h mono">${esc(y)}</div><div class="grid">${arr.map(memCard).join('')}</div>`).join(''):`<div class="empty"><b>No memories here yet</b>Talk about a trip and Wonderbook writes it up for you.<button class="btn primary" data-act="new-memory">${ICON.mic} Record a memory</button></div>`}</div>`}
-function memCard(m){const p=place(m.placeId);return`<button class="card" data-act="open-memory" data-id="${m.id}">${m.photos?.length?`<img class="ph" src="${blob(m.photos[0])}" alt="" loading="lazy">`:`<div class="ph none" style="background:${gradFor(p?.name||m.title)}">${esc(initials(p?.name))}</div>`}<div class="body"><span class="meta">${esc(p?.name||'Somewhere')} · ${fmtDate(m.date)}${m.favorite?' · <span style="color:var(--sun)">★</span>':''}</span><span class="t">${esc(m.title||'Untitled memory')}</span><span class="meta" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(m.body||m.transcript||'')}</span></div></button>`}
+  <div id="j-list" style="display:flex;flex-direction:column;gap:22px">${journalList()}</div></div>`}
+document.addEventListener('input',e=>{if(e.target.dataset?.in==='jq'){S.journalQ=e.target.value;$('#j-list').innerHTML=journalList()}});
+function memCard(m){const p=place(m.placeId);return`<button class="card taped" data-act="open-memory" data-id="${m.id}">${m.photos?.length?`<img class="ph" src="${blob(m.photos[0])}" alt="" loading="lazy">`:`<div class="ph none" style="background:${gradFor(p?.name||m.title)}">${esc(initials(p?.name))}</div>`}<div class="body"><span class="meta k">${esc(p?.name||'Somewhere')} · ${fmtDate(m.date)}${m.favorite?' · <span style="color:var(--visit)">★</span>':''}</span><span class="t">${esc(m.title||'Untitled memory')}</span><span class="meta" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(m.body||m.transcript||'')}</span></div></button>`}
 
 /* ---------- rankings ---------- */
 function renderRankings(){const el=$('#v-rankings');const k=S.rankCat;
@@ -481,13 +659,119 @@ function renderRankings(){const el=$('#v-rankings');const k=S.rankCat;
   el.innerHTML=`<div class="page-inner"><div class="page-h"><div><span class="eyebrow">Your scores, out of 10</span><h2>Rankings</h2></div><div class="seg-toggle"><button data-act="rankby" data-v="cities" aria-pressed="${S.rankBy==='cities'}">Cities</button><button data-act="rankby" data-v="countries" aria-pressed="${S.rankBy==='countries'}">Countries</button></div></div>
   <div class="chips">${[{k:'overall',short:'Overall'},...CATS].map(c=>`<button class="chip" data-act="rankcat" data-k="${c.k}" aria-pressed="${k===c.k}">${c.short}</button>`).join('')}</div>
   <div class="rank-list">${rows.length?rows.map((r,i)=>`<button class="rank" data-act="open-place" data-id="${r.id}"><span class="n mono">${i+1}</span><span style="min-width:0"><b>${esc(r.name)}</b><br><span class="muted" style="font-size:13px">${esc(r.sub)}</span></span><span class="bar"><i style="width:${r.v*10}%;background:${rateColor(r.v)}"></i></span><span class="v mono">${f1(r.v)}</span></button>`).join(''):`<div class="empty">Rate the places you’ve been and they’ll rank here.</div>`}</div>
-  ${rated.length>=2?`<div class="panel-card"><div class="section-h"><h3 style="font-size:22px">Head to head</h3></div><div class="h2h">${[0,1].map(i=>`<select data-act="h2h" data-i="${i}" aria-label="Place ${i+1}">${rated.map(p=>`<option value="${p.id}" ${S.h2h[i]===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`).join('')}</div>
+  ${rated.length>=2?`<div class="panel-card"><div class="section-h"><h3>Head to head</h3></div><div class="h2h">${[0,1].map(i=>`<select data-act="h2h" data-i="${i}" aria-label="Place ${i+1}">${rated.map(p=>`<option value="${p.id}" ${S.h2h[i]===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`).join('')}</div>
   ${A&&B?[{k:'overall',short:'Overall'},...CATS].map(c=>{const a=score(A,c.k),b=score(B,c.k);return`<div class="h2h-row"><div class="l" style="display:flex;gap:8px;align-items:center;justify-content:flex-end"><b class="mono">${f1(a)}</b><span class="bar" style="flex:1"><i style="width:${(a||0)*10}%;margin-left:auto;background:${a!=null&&b!=null&&a>=b?'var(--visit-2)':'var(--ink-2)'}"></i></span></div><span class="c">${c.short}</span><div style="display:flex;gap:8px;align-items:center"><span class="bar" style="flex:1"><i style="width:${(b||0)*10}%;background:${a!=null&&b!=null&&b>=a?'var(--wish)':'var(--ink-2)'}"></i></span><b class="mono">${f1(b)}</b></div></div>`}).join(''):''}</div>`:''}</div>`}
 
 /* ---------- wishlist ---------- */
 function renderWishlist(){const el=$('#v-wishlist');const w=S.places.filter(p=>p.status==='wishlist');
   el.innerHTML=`<div class="page-inner"><div class="page-h"><div><span class="eyebrow">${w.length} places</span><h2>Where next</h2></div><button class="btn violet" data-act="add-place" data-status="wishlist">+ Dream destination</button></div>
   ${w.length?`<div class="wish-grid">${w.map(p=>{const t=p.todo||[];return`<div class="wish-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="min-width:0"><span class="eyebrow">${esc(p.kind==='country'?'Country':p.country)}</span><h3>${esc(p.name)}</h3></div><span class="pill wish mono">${t.filter(x=>x.done).length}/${t.length}</span></div>${todoHTML(p)}<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" data-act="open-place" data-id="${p.id}">Show on globe</button><button class="btn sm primary" data-act="mark-visited" data-id="${p.id}">I went!</button></div></div>`}).join('')}</div>`:`<div class="empty"><b>Where do you want to go next?</b>Add cities or countries, then list the landmarks, teams and events you want to see.<button class="btn violet" data-act="add-place" data-status="wishlist">+ Dream destination</button></div>`}</div>`}
+
+/* ---------- little animations ---------- */
+function enter(el){if(!el)return;el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');clearTimeout(el._en);el._en=setTimeout(()=>el.classList.remove('enter'),900)}
+function confetti(x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const cs=['--visit','--visit-2','--wish','--sun','--mint','--sky'].map(css);
+  x??=innerWidth/2;y??=innerHeight/3;
+  for(let i=0;i<40;i++){const c=document.createElement('i');c.className='confetti';const a=Math.random()*Math.PI*2,d=90+Math.random()*240;
+    c.style.cssText=`background:${cs[i%cs.length]};--x0:${x}px;--y0:${y}px;--x1:${x+Math.cos(a)*d}px;--y1:${y+Math.sin(a)*d+200}px;--rz:${(Math.random()*720-360)|0}deg;--d:${(1+Math.random()*.8).toFixed(2)}s;border-radius:${i%3?'2px':'50%'}`;
+    document.body.appendChild(c);setTimeout(()=>c.remove(),1900)}}
+
+/* ---------- passport stamps ---------- */
+function stampsHTML(){const agg=new Map();
+  for(const p of S.places){if(p.status!=='visited')continue;const k=p.countryId||p.country;if(!k)continue;const a=agg.get(k)||{name:p.country||p.name,id:p.countryId,pid:p.id,years:[],n:0};if(p.kind!=='country')a.n++;(p.years||[]).forEach(y=>a.years.push(+y));agg.set(k,a)}
+  if(!agg.size)return'';
+  return`<div class="section"><div class="section-h"><h3>Passport</h3><span class="muted mono" style="font-size:11px">${agg.size} of ${WORLD} countries</span></div><div class="stamps">${[...agg.values()].sort((a,b)=>(d3.min(a.years)||9999)-(d3.min(b.years)||9999)).map(a=>`<button class="stamp" data-act="open-country" data-cid="${esc(a.id||'')}" data-id="${a.pid}"><b>${esc(a.name)}</b>${a.years.length?d3.min(a.years):'visited'}${a.n?` · ${a.n} ${a.n===1?'city':'cities'}`:''}</button>`).join('')}</div></div>`}
+
+/* ---------- quick picks: famous things nearby, plus classic trip moments, one tap to add ---------- */
+const GENERIC=[['Ate the local speciality','food'],['Walked the old town','experience'],['Watched a live match','sport'],['Sunset viewpoint','experience'],['Local market','experience'],['Night out','experience'],['Main museum','landmark'],['Street food crawl','food'],['Day trip nearby','experience'],['Stadium tour','sport'],['Festival or concert','event'],['Beach day','nature'],['Hike or big walk','nature'],['Found a favourite coffee spot','food']];
+const REC_TYPES=[['sport',/stadium|arena|ballpark|racecourse|race track|racing (circuit|venue)|velodrome|cricket ground|football ground|sports venue|(football|soccer|rugby|cricket|basketball|baseball|hockey|sports) (club|team)/],
+  ['event',/festival|carnival|parade/],
+  ['food',/\b(market|food hall|restaurant|caf[eé]|brewery|distillery|winery|bakery)\b/],
+  ['landmark',/museum|cathedral|church|temple|mosque|synagogue|palace|castle|tower|bridge|monument|square|basilica|\bfort(ress)?\b|gallery|theatre|theater|opera|landmark|shrine|memorial|statue|plaza|skyscraper|observation|ruins|archaeological|amphitheat|fountain|lighthouse|abbey|monastery|citadel|\bgate\b|world heritage|tourist attraction|historic|mausoleum|pagoda|\barch\b|promenade|boulevard|avenue|thoroughfare|street in|\bpier\b|concert hall|amusement park|theme park|cable car|ferris wheel|funicular|cemetery/],
+  ['nature',/\b(park|garden|gardens|beach|mountain|lake|island|forest|hill|bay|waterfall|canyon|nature reserve|zoo|aquarium|volcano|cliff|canal|viewpoint)\b/]];
+const REC_SKIP=/station|railway|metro line|subway|school|college|university|higher.education|district|neighbou?rhood|quarter of|municipality|suburb|borough|ward of|commune|village|town in|city in|capital of|company|corporation|manufacturer|hospital|airport|embassy|hotel|ministry|government|parliament|election|bombing|attack|shooting|murder|disaster|crash|riot|massacre|\bfire\b|explosion|earthquake|prison|politic|newspaper|television|radio|\bbank\b|airline|agency|headquarters|shopping (mall|centre|center)|office building|residential|constituency|diocese|disambiguation|human settlement|administrative|department store|tramway|road in|highway|motorway|\bwar\b|battle|siege|treaty|court|governing body|organi[sz]ation|republic|empire|kingdom|\b(1[0-9]|20)\d\d\b.*\b(1[0-9]|20)\d\d\b/;
+/* The best-known places near a city, from Wikipedia: nearby articles, most linked-to first, kept only if they are somewhere you could go. */
+async function wikiRecs(p){
+  const url=off=>'https://en.wikipedia.org/w/api.php?origin=*&format=json&formatversion=2&action=query&generator=search&gsrsearch='+encodeURIComponent(`nearcoord:12km,${(+p.lat).toFixed(3)},${(+p.lng).toFixed(3)}`)+'&gsrlimit=50&gsrnamespace=0&gsrsort=incoming_links_desc&prop=description&gsroffset='+off;
+  const rs=await Promise.all([0,50].map(o=>fetch(url(o)).then(r=>r.json()).catch(()=>({}))));
+  const pages=rs.flatMap((r,i)=>(r.query?.pages||[]).map(pg=>({...pg,index:(pg.index||0)+i*1000}))).sort((a,b)=>a.index-b.index);
+  if(!pages.length)throw new Error('none');
+  const out=[],seen=new Set();
+  for(const o of pages){const d=(o.description||'').toLowerCase(),name=o.title.replace(/\s*\([^)]*\)$/,'').replace(/,.*$/,''),ln=name.toLowerCase();
+    if(!d||REC_SKIP.test(d)||/^\d{4}\b|^list of|station$/i.test(o.title))continue;
+    if(ln===p.name.toLowerCase()||ln===String(p.country).toLowerCase()||seen.has(ln))continue;
+    const t=REC_TYPES.find(([,re])=>re.test(ln+' '+d));if(!t)continue;
+    seen.add(ln);out.push({name,type:t[0],note:o.description});if(out.length>=14)break}
+  return out}
+const recCache={get(id){try{const c=JSON.parse(localStorage.getItem('wb_recs')||'{}')[id];return c&&Date.now()-c.at<2592e6?c.items:null}catch(e){return null}},
+  set(id,items){try{const c=JSON.parse(localStorage.getItem('wb_recs')||'{}');c[id]={at:Date.now(),items};localStorage.setItem('wb_recs',JSON.stringify(c))}catch(e){}}};
+function loadRecs(p){if(S.recs[p.id]!==undefined||S.dbState!=='ready')return;const c=recCache.get(p.id);if(c){S.recs[p.id]=c;return}
+  if(B.mode!=='local'||p.kind==='country'||typeof p.lat!=='number'){S.recs[p.id]=[];return}
+  S.recs[p.id]='loading';
+  wikiRecs(p).then(items=>{S.recs[p.id]=items;recCache.set(p.id,items)}).catch(()=>{S.recs[p.id]=[]})
+    .finally(()=>{const q=place(p.id);if(q)document.querySelectorAll(`.quick[data-rid="${p.id}"]`).forEach(el=>el.outerHTML=recsHTML(q)||'')})}
+function recsHTML(p){loadRecs(p);const st=S.recs[p.id];const have=new Set((p.todo||[]).map(t=>t.text.toLowerCase()));
+  const local=(Array.isArray(st)?st:[]).filter(x=>!have.has(x.name.toLowerCase()));
+  const gen=GENERIC.filter(([n])=>!have.has(n.toLowerCase())).map(([name,type])=>({name,type}));
+  const open=S.recsOpen[p.id],nl=open?12:6,ng=open?14:(local.length?4:7);
+  const shown=[...local.slice(0,nl),...gen.slice(0,ng)];
+  if(!shown.length&&st!=='loading')return'';
+  const chip=it=>`<button class="qp ${it.type}" data-act="quick-add" data-id="${p.id}" data-name="${esc(it.name)}" data-type="${it.type}" title="${esc(it.note||it.type)}"><i>+</i>${esc(it.name)}</button>`;
+  return`<div class="quick" data-rid="${p.id}"><span class="eyebrow">${p.status==='visited'?'Quick picks · tap what you did':'Quick picks · tap to add to your list'}</span>
+  <div class="quick-chips">${st==='loading'?'<span class="muted" style="font-size:13px"><span class="spinner"></span> Finding the famous spots…</span>':''}${shown.map(chip).join('')}</div>
+  ${local.length>nl||gen.length>ng||open?`<button class="btn sm ghost" style="align-self:flex-start" data-act="recs-more" data-id="${p.id}">${open?'Show fewer':'More ideas'}</button>`:''}</div>`}
+
+/* ---------- timeline ---------- */
+const TL={obs:null,rot:[0,-15,0],k:1,timer:null,play:null,active:null,years:[]};
+function timelineData(){const map=new Map();
+  const add=(y,p)=>{if(!map.has(y))map.set(y,new Map());const m=map.get(y);if(!m.has(p.id))m.set(p.id,{p,ms:[]});return m.get(p.id)};
+  for(const p of S.places){if(p.status!=='visited')continue;for(const y of p.years||[])if(+y)add(+y,p)}
+  for(const m of S.memories){const p=place(m.placeId),y=+(m.date||'').slice(0,4);if(p&&y)add(y,p).ms.push(m)}
+  const dated=new Set([...map.values()].flatMap(m=>[...m.keys()]));
+  return{years:[...map.keys()].sort((a,b)=>a-b).map(y=>({y,items:[...map.get(y).values()]})),undated:S.places.filter(p=>p.status==='visited'&&!dated.has(p.id))}}
+function tlCard({p,ms}){const ph=ms.find(m=>m.photos?.length)?.photos[0]||p.coverId;const o=overall(p);
+  return`<div class="tl-card"><button class="card taped" data-act="open-place" data-id="${p.id}">${ph?`<img class="ph" src="${blob(ph)}" alt="" loading="lazy">`:`<div class="ph none" style="background:${gradFor(p.name)}">${esc(initials(p.name))}</div>`}<div class="body"><span class="t">${esc(p.name)}</span><span class="meta k">${esc(p.kind==='country'?'Country':p.country)}${o!=null?` · ${f1(o)}/10`:''}</span></div></button>${ms.slice(0,3).map(m=>`<button class="tl-mem" data-act="open-memory" data-id="${m.id}">${esc(m.title||'Untitled memory')}</button>`).join('')}${ms.length>3?`<span class="muted" style="font-size:12px">+${ms.length-3} more in the journal</span>`:''}</div>`}
+function renderTimeline(){const el=$('#v-timeline');const{years,undated}=timelineData();
+  const head=`<div class="page-h"><div><span class="eyebrow">${years.length?`${years.length} year${years.length>1?'s':''} of travel`:'Your travels, year by year'}</span><h2>Timeline</h2></div></div>`;
+  TL.obs?.disconnect();
+  if(!years.length){TL.years=[];el.innerHTML=`<div class="page-inner">${head}<div class="empty"><b>No years yet</b>Add a place you’ve been and the year you went. It lands here.<button class="btn primary" data-act="add-place" data-status="visited">Add a place</button></div></div>`;return}
+  const seen=new Set(),firsts=new Map();for(const yr of years){const cs=new Set(yr.items.map(i=>i.p.countryId||i.p.country));firsts.set(yr.y,[...cs].filter(c=>!seen.has(c)).length);cs.forEach(c=>seen.add(c))}
+  TL.years=years;const shown=S.tlOrder==='desc'?[...years].reverse():years;const pl=(n,a,b)=>`${n} ${n===1?a:b}`;
+  el.innerHTML=`<div class="tl-wrap"><aside class="tl-side"><div class="tl-globe"><canvas id="tl-canvas" width="460" height="460" aria-hidden="true"></canvas><div class="tl-big" id="tl-big"></div></div>
+  <div class="tl-years" id="tl-years">${shown.map(yr=>`<button data-act="tl-year" data-y="${yr.y}">${yr.y}<span>${pl(yr.items.length,'place','places')}</span></button>`).join('')}</div>
+  <div class="tl-ctl"><button class="btn sm primary" data-act="tl-play" id="tl-play">${TL.play?'■ <span class="lbl">Stop</span>':'▶ <span class="lbl">Play my travels</span>'}</button><button class="btn sm" data-act="tl-order" title="Change the order">⇅ <span class="lbl">${S.tlOrder==='asc'?'Oldest first':'Newest first'}</span></button></div></aside>
+  <div class="tl-main">${head}<div class="tl-line">${shown.map(yr=>{const cs=new Set(yr.items.map(i=>i.p.countryId||i.p.country)).size,mc=d3.sum(yr.items,i=>i.ms.length),nf=firsts.get(yr.y);
+    return`<section class="tl-year" data-y="${yr.y}" id="tl-${yr.y}"><h3 class="tl-yh">${yr.y}</h3><p class="tl-stats">${pl(yr.items.length,'place','places')} · ${pl(cs,'country','countries')}${mc?' · '+pl(mc,'memory','memories'):''}${nf?' · '+pl(nf,'new country','new countries'):''}</p><div class="tl-grid">${yr.items.map(tlCard).join('')}</div></section>`}).join('')}
+  ${undated.length?`<section class="tl-year" data-y="0"><h3 class="tl-yh" style="font-size:60px">Sometime</h3><p class="tl-stats">No year yet. Open a place and tap “+ year”.</p><div class="tl-grid">${undated.map(p=>tlCard({p,ms:[]})).join('')}</div></section>`:''}</div></div></div>`;
+  TL.obs=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting)tlActive(+e.target.dataset.y)},{root:el,rootMargin:'-30% 0px -69% 0px'});
+  el.querySelectorAll('.tl-year').forEach(s=>{if(+s.dataset.y)TL.obs.observe(s)});
+  tlActive(years.some(y=>y.y===TL.active)?TL.active:shown[0].y,true)}
+function tlActive(y,force){if(!force&&TL.active===y)return;TL.active=y;const el=$('#v-timeline');
+  el.querySelectorAll('.tl-year').forEach(s=>s.classList.toggle('on',+s.dataset.y===y));
+  const box=$('#tl-years');el.querySelectorAll('#tl-years button').forEach(b=>{const on=+b.dataset.y===y;b.setAttribute('aria-current',on);
+    if(on&&box)box.scrollTo({left:b.offsetLeft-box.clientWidth/2+b.clientWidth/2,top:b.offsetTop-box.clientHeight/2+b.clientHeight/2,behavior:'smooth'})});
+  const big=$('#tl-big');if(big){big.textContent=y;big.classList.remove('tick');void big.offsetWidth;big.classList.add('tick')}
+  tlGlobe(y)}
+/* A small globe that turns to wherever that year took you. Earlier years stay faintly coloured, so the world fills in. */
+function tlGlobe(y){const cv=$('#tl-canvas');const yr=TL.years.find(x=>x.y===y);if(!cv||!yr||!G.features.length)return;
+  const ps=yr.items.map(i=>i.p).filter(p=>typeof p.lat==='number'),all=ps.map(p=>[p.lng,p.lat]),pins=ps.filter(p=>p.kind!=='country').map(p=>[p.lng,p.lat]);
+  const now=new Set(yr.items.map(i=>String(i.p.countryId))),before=new Set(TL.years.filter(x=>x.y<y).flatMap(x=>x.items.map(i=>String(i.p.countryId))));
+  const c=all.length?d3.geoCentroid({type:'MultiPoint',coordinates:all}):[-TL.rot[0],-TL.rot[1]];
+  const spread=all.length?d3.max(all,p=>d3.geoDistance(p,c)):1,k1=Math.max(1,Math.min(2.8,.75/(spread+.25)));
+  const r0=TL.rot.slice(),k0=TL.k,dl=((-c[0]-r0[0])%360+540)%360-180,ri=d3.interpolate(r0,[r0[0]+dl,-c[1],0]);
+  const ctx=cv.getContext('2d'),W=cv.width,proj=d3.geoOrthographic().clipAngle(90).translate([W/2,W/2]),path=d3.geoPath(proj,ctx);
+  const col={ocean:css('--ocean'),land:css('--land'),line:css('--land-line'),now:css('--visit'),before:d3.color(css('--visit')).copy({opacity:.38})+'',pin:css('--visit-2'),ink:css('--ink')};
+  const draw=t=>{TL.rot=ri(t);TL.k=k0+(k1-k0)*t;proj.rotate(TL.rot).scale(W/2*TL.k);
+    ctx.fillStyle=col.ocean;ctx.fillRect(0,0,W,W);ctx.lineWidth=1;ctx.strokeStyle=col.line;
+    for(const f of G.features){const id=String(f.id);ctx.beginPath();path(f);ctx.fillStyle=col.land;ctx.fill();if(now.has(id)||before.has(id)){ctx.fillStyle=now.has(id)?col.now:col.before;ctx.fill()}ctx.stroke()}
+    for(const p of pins){if(d3.geoDistance(p,[-TL.rot[0],-TL.rot[1]])>1.5)continue;const q=proj(p);ctx.beginPath();ctx.arc(q[0],q[1],10,0,7);ctx.fillStyle=col.pin;ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=col.ink;ctx.stroke();ctx.lineWidth=1;ctx.strokeStyle=col.line}};
+  TL.timer?.stop();if(matchMedia('(prefers-reduced-motion: reduce)').matches){draw(1);return}
+  const t0=performance.now();TL.timer=d3.timer(()=>{const t=Math.min(1,(performance.now()-t0)/900);draw(d3.easeCubicInOut(t));if(t>=1)TL.timer.stop()})}
+function tlPlay(){const label=()=>{const b=$('#tl-play');if(b)b.innerHTML=TL.play?'■ <span class="lbl">Stop</span>':'▶ <span class="lbl">Play my travels</span>'};
+  const stop=()=>{clearInterval(TL.play);TL.play=null;label()};
+  if(TL.play){stop();return}
+  const ys=[...$('#v-timeline').querySelectorAll('.tl-year')].map(s=>+s.dataset.y).filter(Boolean);let i=0;
+  const step=()=>{if(S.view!=='timeline'||i>=ys.length){stop();return}$('#tl-'+ys[i])?.scrollIntoView({behavior:'smooth',block:'start'});i++};
+  TL.play=setInterval(step,2600);label();step()}
 
 /* ---------- modals ---------- */
 function openModal(html,mount){const o=document.createElement('div');o.className='overlay';o.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
@@ -542,78 +826,116 @@ async function createPlace(d){const id=uid();const doc={name:d.name,kind:d.kind|
 const draftStore={get(){try{return JSON.parse(localStorage.getItem('wb_draft')||'null')}catch(e){return null}},set(v){try{localStorage.setItem('wb_draft',JSON.stringify(v))}catch(e){}},clear(){try{localStorage.removeItem('wb_draft')}catch(e){}}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)S.flushDraft?.()});
 window.addEventListener('pagehide',()=>S.flushDraft?.());
+/* The memory composer: talk, and the key points sort themselves onto sticky notes as you go. */
+const COVER=[{k:'best',label:'Best moment',q:'What was the best moment?'},{k:'food',label:'Food',q:'What did you eat or drink?'},{k:'people',label:'People',q:'Who were you with, or who did you meet?'},{k:'saw',label:'What you saw',q:'What did you see or do?'},{k:'feel',label:'How it felt',q:'How did it feel being there?'},{k:'live',label:'Live there?',q:'Could you live there? Why, or why not?'},{k:'tips',label:'Tips',q:'Any tips for next time?'}];
+const SEC=[['hi','Best bits','y'],['lo','Not so great','p'],['tk','Tips & takeaways','b']];
 function openComposer(opts={}){
   let m=opts.mem||{};const draft=draftStore.get();const restored=!!draft&&(draft.id||null)===(m.id||null);if(restored)m={...m,...draft.f};
-  const D={placeId:m.placeId||opts.placeId||(S.sel?.type==='place'?S.sel.id:'')||'',photos:[...(m.photos||[])],files:[],added:restored?[...(draft.f.added||[])]:[],tags:[...(m.tags||[])],ratings:null};
   if(!S.places.length){toast('Add a place first, then add memories to it.');openAddPlace();return}
+  const D={placeId:m.placeId||opts.placeId||(S.sel?.type==='place'?S.sel.id:'')||'',photos:[...(m.photos||[])],added:restored?[...(draft.f.added||[])]:[],tags:[...(m.tags||[])],ratings:null,
+    hi:[...(m.highlights||[])],lo:[...(m.lows||[])],tk:[...(m.takeaways||[])]};
+  /* Anything already written by hand stays as it is; only untouched parts fill in by themselves. */
+  D.lock=restored&&draft.f.lock?{...draft.f.lock}:{title:!!m.title,body:!!m.body,hi:D.hi.length>0,lo:D.lo.length>0,tk:D.tk.length>0,tags:D.tags.length>0,date:!!m.id};
   const opt=g=>S.places.filter(p=>p.status===g).map(p=>`<option value="${p.id}" ${D.placeId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
   openModal(`<h2>${m.id?'Edit memory':'New memory'}</h2>
-  <div class="row2"><label class="field">Place<select id="c-place"><option value="">Choose a place</option><optgroup label="Been there">${opt('visited')}</optgroup><optgroup label="Want to go">${opt('wishlist')}</optgroup></select></label><label class="field">Date<input type="date" id="c-date" value="${esc(m.date||today())}"></label></div>
-  <div class="mic-zone"><button class="mic" id="c-mic" type="button" aria-label="Start talking" ${S.dict?'':'hidden'}>${ICON.mic}</button><div style="flex:1;min-width:0"><b id="c-micst">${S.dict?'Tap the mic and talk it through':'Type or paste your thoughts'}</b><div class="muted" style="font-size:13px">Ramble freely. Then tap Organise and Wonderbook writes it up.</div></div></div>
-  <label class="field">What happened<textarea id="c-tr" rows="5" placeholder="Where you went, who you were with, what you ate, how it felt…">${esc(m.transcript||'')}</textarea></label>
+  <div class="row2"><label class="field">Place<select id="c-place"><option value="">Choose a place</option><optgroup label="Been there">${opt('visited')}</optgroup><optgroup label="Want to go">${opt('wishlist')}</optgroup></select></label><div class="field"><label for="c-date">Date</label><input type="date" id="c-date" value="${esc(m.date||today())}"><span id="c-datehint"></span></div></div>
+  <div class="mic-zone"><button class="mic" id="c-mic" type="button" aria-label="Start talking" ${S.dict?'':'hidden'}>${ICON.mic}</button><div style="flex:1;min-width:0"><b id="c-micst">${S.dict?'Tap the mic and just talk':'Type or paste your thoughts'}</b><span class="wave" id="c-wave" hidden aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><div class="prompt" id="c-prompt">Ramble. I’ll pull out the key points.</div></div></div>
+  <div class="field">Things worth mentioning <span class="muted" style="font-weight:400">They tick themselves off as you cover them. Tap one for a nudge.</span><div class="cover-list" id="c-cover">${COVER.map(c=>`<button type="button" class="cv" data-cv="${c.k}"><i></i>${c.label}</button>`).join('')}</div></div>
+  <label class="field">What I said<textarea id="c-tr" rows="4" placeholder="Where you went, who you were with, what you ate, how it felt…">${esc(m.transcript||'')}</textarea></label>
   <div class="partial" id="c-partial"></div>
-  ${B.hasAI()?`<button class="btn violet" id="c-ai" type="button" style="align-self:flex-start">${ICON.spark} Organise my notes</button>`:''}
+  <div class="board"><div class="board-h"><h3>Key points</h3><span class="muted" id="c-auto">Fills in by itself as you talk or type.</span>${B.hasAI()?`<button class="btn sm violet" id="c-ai" type="button">${ICON.spark} Organise again</button>`:''}</div>
   <label class="field">Title<input type="text" id="c-title" value="${esc(m.title||'')}" placeholder="Sunset on the Alfama rooftops"></label>
-  <label class="field">Summary<textarea id="c-body" rows="3">${esc(m.body||'')}</textarea></label>
-  <div class="row2"><label class="field">Highlights (one per line)<textarea id="c-hi" rows="4">${esc((m.highlights||[]).join('\n'))}</textarea></label><label class="field">Takeaways (one per line)<textarea id="c-tk" rows="4">${esc((m.takeaways||[]).join('\n'))}</textarea></label></div>
-  <div id="c-rates" hidden></div>
+  <label class="field">In short<textarea id="c-body" rows="3">${esc(m.body||'')}</textarea></label>
+  <div class="notes3">${SEC.map(([k,l,c])=>`<div class="note ${c}" data-sec="${k}"><b class="h">${l}</b><ul></ul><button type="button" class="note-add">+ add a point</button></div>`).join('')}</div>
+  <div id="c-rates" hidden></div></div>
   <div class="field">Tags<div class="chips" id="c-tags">${TAGS.map(t=>`<button type="button" class="tagbtn" data-t="${esc(t)}" aria-pressed="${D.tags.includes(t)}">${esc(t)}</button>`).join('')}</div></div>
   <div class="field">Photos<div class="photos" id="c-photos"></div></div>
   <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="c-save">Save memory</button></div>`,(el,close)=>{
-    const q=s=>el.querySelector(s);
-    const lns=v=>v.split('\n').map(x=>x.trim()).filter(Boolean);
-    const saveDraft=()=>{if(!el.isConnected)return;const f={placeId:q('#c-place').value,date:q('#c-date').value,transcript:q('#c-tr').value,title:q('#c-title').value,body:q('#c-body').value,highlights:lns(q('#c-hi').value),takeaways:lns(q('#c-tk').value),tags:D.tags,photos:D.photos,added:D.added};
-      if(f.transcript.trim()||f.title.trim()||f.body.trim()||f.highlights.length||f.takeaways.length||f.photos.length)draftStore.set({id:m.id||null,at:Date.now(),f})};
+    const q=s=>el.querySelector(s),tr=q('#c-tr'),mic=q('#c-mic'),date=q('#c-date');
+    const clean=a=>a.map(x=>x.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
+    const saveDraft=()=>{if(!el.isConnected)return;const f={placeId:q('#c-place').value,date:date.value,transcript:tr.value,title:q('#c-title').value,body:q('#c-body').value,highlights:clean(D.hi),lows:clean(D.lo),takeaways:clean(D.tk),tags:D.tags,photos:D.photos,added:D.added,lock:D.lock};
+      if(f.transcript.trim()||f.title.trim()||f.body.trim()||f.highlights.length||f.lows.length||f.takeaways.length||f.photos.length)draftStore.set({id:m.id||null,at:Date.now(),f})};
     let dT=null;const later=()=>{clearTimeout(dT);dT=setTimeout(saveDraft,400)};
     S.flushDraft=saveDraft;el.addEventListener('input',later);el.addEventListener('change',later);
     if(restored)toast('Your unsaved memory is back. Cancel discards it.',4500);
     q('[data-close]').onclick=()=>{close();draftStore.clear();for(const id of D.added)B.photo?.del(id).catch(()=>{})};
-    q('#c-tags').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;D.tags=D.tags.includes(t)?D.tags.filter(x=>x!==t):[...D.tags,t];b.setAttribute('aria-pressed',D.tags.includes(t));later()};
-    const drawPhotos=()=>{q('#c-photos').innerHTML=D.photos.map((id,i)=>`<div class="ph-item"><img src="${blob(id)}" alt=""><button type="button" data-rm="o${i}" aria-label="Remove photo">×</button></div>`).join('')+D.files.map((f,i)=>`<div class="ph-item"><img src="${URL.createObjectURL(f)}" alt=""><button type="button" data-rm="n${i}" aria-label="Remove photo">×</button></div>`).join('')+(B.photo?`<label class="photo-add">+ Add photos<input type="file" accept="image/*" multiple hidden id="c-file"></label>`:`<span class="muted" style="font-size:13px">Photo uploads aren’t available in this view.</span>`);
-      const fi=q('#c-file');if(fi)fi.onchange=async()=>{const fs=[...fi.files];let bad=0;const lab=fi.closest('label');lab.firstChild.textContent='Adding…';for(const f of fs){try{const id=await B.photo.upload(await compress(f));D.photos.push(id);D.added.push(id)}catch(e){bad++}}if(bad)toast(`${bad} photo${bad>1?'s':''} couldn’t be added (try JPEG or PNG).`);drawPhotos();saveDraft()}};
-    q('#c-photos').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const v=b.dataset.rm;if(v[0]==='o')D.photos.splice(+v.slice(1),1);else D.files.splice(+v.slice(1),1);drawPhotos();later()};drawPhotos();
-    // dictation
-    const tr=q('#c-tr'),mic=q('#c-mic');
-    S.dictTarget={append:t=>{tr.value=(tr.value?tr.value:'')+(tr.value?t:t.trimStart());later()},partial:t=>{q('#c-partial').textContent=t},state:(st,reason)=>{const live=st!=='idle';mic.classList.toggle('live',live);mic.innerHTML=live?ICON.stop:ICON.mic;mic.setAttribute('aria-label',live?'Stop':'Start talking');
-      q('#c-micst').textContent=st==='listening'?'Listening… tap to stop':st==='starting'?'Starting…':st==='finishing'?'Finishing up…':(reason==='not_granted'?'Microphone is off. Type instead.':'Tap the mic and talk it through');if(!live)q('#c-partial').textContent=''}};
-    mic.onclick=()=>{if(!S.dict)return;if(S.dict.active()){S.dict.stop().catch(()=>{});return}
+    const drawTags=()=>q('#c-tags').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',D.tags.includes(b.dataset.t)));
+    q('#c-tags').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;D.tags=D.tags.includes(t)?D.tags.filter(x=>x!==t):[...D.tags,t];D.lock.tags=true;drawTags();later()};
+    /* photos are stored the moment they are picked */
+    const drawPhotos=()=>{q('#c-photos').innerHTML=D.photos.map((id,i)=>`<div class="ph-item"><img src="${blob(id)}" alt=""><button type="button" data-rm="${i}" aria-label="Remove photo">×</button></div>`).join('')+(B.photo?`<label class="photo-add">+ Add photos<input type="file" accept="image/*" multiple hidden id="c-file"></label>`:`<span class="muted" style="font-size:13px">Photo uploads aren’t available in this view.</span>`);
+      const fi=q('#c-file');if(fi)fi.onchange=async()=>{const fs=[...fi.files];let bad=0;fi.closest('label').firstChild.textContent='Adding…';for(const f of fs){try{const id=await B.photo.upload(await compress(f));D.photos.push(id);D.added.push(id)}catch(e){bad++}}if(bad)toast(`${bad} photo${bad>1?'s':''} couldn’t be added (try JPEG or PNG).`);drawPhotos();saveDraft()}};
+    q('#c-photos').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;D.photos.splice(+b.dataset.rm,1);drawPhotos();later()};drawPhotos();
+    /* sticky notes */
+    const drawNotes=(only,fresh)=>{for(const[k]of SEC){if(only&&only!==k)continue;q(`[data-sec="${k}"] ul`).innerHTML=D[k].map((t,i)=>`<li class="${fresh?'new':''}"><textarea rows="1" data-i="${i}" aria-label="Point">${esc(t)}</textarea><button type="button" class="x" data-rm="${i}" aria-label="Remove this point">×</button></li>`).join('')}};
+    el.querySelectorAll('.note').forEach(n=>{const k=n.dataset.sec;
+      n.addEventListener('input',e=>{const i=e.target.dataset.i;if(i==null)return;D[k][+i]=e.target.value;D.lock[k]=true});
+      n.addEventListener('click',e=>{const rm=e.target.closest('[data-rm]');
+        if(rm){D[k].splice(+rm.dataset.rm,1);D.lock[k]=true;drawNotes(k);later()}
+        else if(e.target.closest('.note-add')){D[k].push('');D.lock[k]=true;drawNotes(k);n.querySelector('li:last-child textarea').focus()}})});
+    drawNotes();
+    q('#c-title').addEventListener('input',()=>D.lock.title=true);q('#c-body').addEventListener('input',()=>D.lock.body=true);
+    /* fill the board from what was said, leaving anything hand-edited alone */
+    const same=(a,b)=>a.length===b.length&&a.every((x,i)=>x===b[i]);
+    const apply=(r,force)=>{const L=force?{}:D.lock;
+      if(!L.title&&r.title)q('#c-title').value=r.title;if(!L.body&&r.summary)q('#c-body').value=r.summary;
+      for(const[k,src,n]of[['hi','highlights',6],['lo','lows',4],['tk','takeaways',4]]){if(L[k]||!Array.isArray(r[src]))continue;const v=r[src].filter(x=>typeof x==='string').slice(0,n);if(!same(v,D[k])){D[k]=v;drawNotes(k,true)}}
+      if(!L.tags&&Array.isArray(r.tags)){D.tags=r.tags.filter(t=>TAGS.includes(t));drawTags()}
+      const rt=Object.fromEntries(Object.entries(r.ratings||{}).filter(([k,v])=>CATS.some(c=>c.k===k)&&Number.isFinite(+v)).map(([k,v])=>[k,Math.max(1,Math.min(10,Math.round(+v)))]));
+      const box=q('#c-rates'),was=q('#c-apply')?.checked??true;
+      if(Object.keys(rt).length){D.ratings=rt;box.hidden=false;box.className='note g';box.innerHTML=`<b class="h">Ratings you hinted at</b><div class="chips">${Object.entries(rt).map(([k,v])=>`<span class="pill">${CATS.find(c=>c.k===k).short} <b class="mono">${v}</b></span>`).join('')}</div><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="c-apply" ${was?'checked':''}> Add these to the place’s ratings where I haven’t rated yet</label>`}
+      else{D.ratings=null;box.hidden=true}};
+    const drawCover=text=>{const c=coverage(text);el.querySelectorAll('.cv').forEach(b=>{const ok=c.has(b.dataset.cv);b.classList.toggle('ok',ok);b.firstChild.textContent=ok?'✓':''});return c};
+    const MN=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const dateHint=text=>{const box=q('#c-datehint');const h=D.lock.date?null:dateFromText(text);const cur=date.value||today();
+      if(!h||(h.y===+cur.slice(0,4)&&(!h.mo||h.mo===+cur.slice(5,7)))){box.innerHTML='';return}
+      box.innerHTML=`<button type="button" class="btn sm" style="margin-top:4px">Sounds like ${h.mo?MN[h.mo-1]+' ':''}${h.y}. Use it</button>`;
+      box.firstChild.onclick=()=>{date.value=`${h.y}-${String(h.mo||+cur.slice(5,7)).padStart(2,'0')}-${String(Math.min(28,+cur.slice(8)||1)).padStart(2,'0')}`;D.lock.date=true;box.innerHTML='';later()}};
+    date.addEventListener('change',()=>{D.lock.date=true;q('#c-datehint').innerHTML=''});
+    const live=()=>{if(!el.isConnected)return;const text=tr.value.trim();drawCover(text);dateHint(text);if(text.split(/\s+/).length<6)return;apply(organiseLocally(text));later()};
+    let lT=null;const liveSoon=()=>{clearTimeout(lT);lT=setTimeout(live,450)};
+    tr.addEventListener('input',liveSoon);if(tr.value.trim())drawCover(tr.value);
+    /* nudges while talking */
+    const prompt=q('#c-prompt');const say=t=>{if(prompt.textContent===t)return;prompt.textContent=t;prompt.classList.remove('swap');void prompt.offsetWidth;prompt.classList.add('swap')};
+    let pi=0,pT=null,asked=false;const nudge=()=>{if(!el.isConnected){clearInterval(pT);return}const c=coverage(tr.value);const left=COVER.filter(x=>!c.has(x.k));say(left.length?left[pi++%left.length].q:'You’ve covered the lot. Anything else?')};
+    const startMic=()=>{if(!S.dict||S.dict.active())return;
       S.dict.start().catch(e=>{if(e?.code==='not_granted'){mic.hidden=true;toast('Microphone access is off. You can type instead.')}else if(e?.code==='unavailable'){mic.hidden=true}else if(e?.code!=='stopped'&&e?.code!=='dismissed')toast('Dictation stopped. Tap the mic to try again.')})};
-    // AI
-    const ai=q('#c-ai');if(ai)ai.onclick=async()=>{const text=tr.value.trim();if(text.length<10){toast('Say or type a little more first.');return}
+    q('#c-cover').onclick=e=>{const b=e.target.closest('.cv');if(!b)return;asked=true;say(COVER.find(c=>c.k===b.dataset.cv).q);if(S.dict&&!mic.hidden)startMic();else tr.focus()};
+    S.dictTarget={append:t=>{tr.value=(tr.value?tr.value:'')+(tr.value?t:t.trimStart());tr.scrollTop=tr.scrollHeight;later();liveSoon()},partial:t=>{q('#c-partial').textContent=t},
+      state:(st,reason)=>{const on=st!=='idle';mic.classList.toggle('live',on);mic.innerHTML=on?ICON.stop:ICON.mic;mic.setAttribute('aria-label',on?'Stop':'Start talking');q('#c-wave').hidden=st!=='listening';
+        q('#c-micst').textContent=st==='listening'?'Listening':st==='starting'?'Starting…':st==='finishing'?'Finishing up…':(reason==='not_granted'?'Microphone is off. Type instead.':'Tap the mic and just talk');
+        clearInterval(pT);if(st==='listening'){if(!asked)nudge();asked=false;pT=setInterval(nudge,9000)}
+        if(!on){q('#c-partial').textContent='';live();say(tr.value.trim()?'Tap the mic to add more, or check the key points below.':'Ramble. I’ll pull out the key points.')}}};
+    mic.onclick=()=>{if(!S.dict)return;if(S.dict.active()){S.dict.stop().catch(()=>{});return}startMic()};
+    /* a fuller write-up on request: Claude when a key is saved, otherwise this device */
+    const ai=q('#c-ai');if(ai)ai.onclick=async()=>{const text=tr.value.trim();if(text.split(/\s+/).length<4){toast('Say or type a little more first.');return}
       if(S.dict?.active())await S.dict.stop().catch(()=>{});
       const p=place(q('#c-place').value);ai.disabled=true;ai.innerHTML='<span class="spinner"></span> Organising…';
-      try{const r=await organise(text,`You help someone keep a personal travel journal. Below is what they said out loud (dictated, so it may ramble) about a memory${p?` in ${p.name}${p.kind==='country'?'':', '+p.country}`:''}${q('#c-date').value?` on ${q('#c-date').value}`:''}.
-Turn it into a tidy journal entry in their own voice: first person, warm, specific. Use only what they said; do not invent details.
+      try{const r=await organise(text,`You help someone keep a personal travel journal. Below is what they said out loud (dictated, so it may ramble) about a memory${p?` in ${p.name}${p.kind==='country'?'':', '+p.country}`:''}${date.value?` on ${date.value}`:''}.
+Pull out their key points and turn them into a tidy journal entry in their own voice: first person, warm, specific. Use only what they said; do not invent details.
 Return JSON only, with this shape:
 {"title": "short evocative title, at most 7 words",
  "summary": "2 to 4 sentences, first person",
- "highlights": ["up to 4 short phrases: the best moments"],
- "takeaways": ["up to 3 short phrases: what they learned or felt, or advice to a friend"],
+ "highlights": ["up to 5 short phrases: the best moments and key things that happened"],
+ "lows": ["up to 3 short phrases: anything disappointing or hard; empty if none"],
+ "takeaways": ["up to 3 short phrases: what they learned or felt, or tips for next time"],
  "tags": [only from: ${TAGS.map(t=>JSON.stringify(t)).join(', ')}],
  "ratings": {only include keys they clearly gave an opinion on, from: live (would they live there), food, people, sights (attractions), nature, nightlife, value, safety, transport, vibe; each an integer 1-10}}
 What they said:
 """${text.slice(0,12000)}"""`);
-        if(r.title)q('#c-title').value=r.title;if(r.summary)q('#c-body').value=r.summary;
-        if(Array.isArray(r.highlights))q('#c-hi').value=r.highlights.join('\n');if(Array.isArray(r.takeaways))q('#c-tk').value=r.takeaways.join('\n');
-        if(Array.isArray(r.tags)){D.tags=r.tags.filter(t=>TAGS.includes(t));q('#c-tags').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',D.tags.includes(b.dataset.t)))}
-        const rt=Object.fromEntries(Object.entries(r.ratings||{}).filter(([k,v])=>CATS.some(c=>c.k===k)&&Number.isFinite(+v)).map(([k,v])=>[k,Math.max(1,Math.min(10,Math.round(+v)))]));
-        if(Object.keys(rt).length){D.ratings=rt;const box=q('#c-rates');box.hidden=false;box.className='ai-box';box.innerHTML=`<span class="eyebrow">Ratings you hinted at</span><div class="chips">${Object.entries(rt).map(([k,v])=>`<span class="pill">${CATS.find(c=>c.k===k).short} <b class="mono">${v}</b></span>`).join('')}</div><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="c-apply" checked> Add these to the place’s ratings where I haven’t rated yet</label>`}
+        apply(r,true);D.lock={title:true,body:true,hi:true,lo:true,tk:true,tags:true,date:D.lock.date};q('#c-auto').textContent='Organised. Tap “Organise again” if you add more.';
         saveDraft();toast('Organised. Check it over, then save.');
-      }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise my notes`}};
-    // save
+      }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise again`}};
+    /* save */
     q('#c-save').onclick=async()=>{const placeId=q('#c-place').value;if(!placeId){toast('Choose which place this memory is from.');q('#c-place').focus();return}
       const btn=q('#c-save');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving…';
-      try{const photos=[...D.photos];let failed=0;
-        for(let i=0;i<D.files.length;i++){btn.innerHTML=`<span class="spinner"></span> Uploading photo ${i+1} of ${D.files.length}…`;try{photos.push(await B.photo.upload(await compress(D.files[i])))}catch(e){failed++}}
-        const lines=s=>s.split('\n').map(x=>x.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
-        const data={placeId,date:q('#c-date').value,title:q('#c-title').value.trim()||'Untitled memory',body:q('#c-body').value.trim(),transcript:tr.value.trim(),highlights:lines(q('#c-hi').value),takeaways:lines(q('#c-tk').value),tags:D.tags,photos,updatedAt:Date.now()};
+      try{const data={placeId,date:date.value,title:q('#c-title').value.trim()||'Untitled memory',body:q('#c-body').value.trim(),transcript:tr.value.trim(),highlights:clean(D.hi),lows:clean(D.lo),takeaways:clean(D.tk),tags:D.tags,photos:[...D.photos],updatedAt:Date.now()};
         if(m.id)await B.updateMem(m.id,data);else await B.addMem({...data,favorite:false,createdAt:Date.now()});
         const p=place(placeId);if(p){const upd={};
           if(p.status==='wishlist'){upd.status='visited'}
           const y=+(data.date||'').slice(0,4);if(y&&!(p.years||[]).map(Number).includes(y))upd.years=[...(p.years||[]),y];
           if(D.ratings&&q('#c-apply')?.checked){const r={...(p.ratings||{})};for(const[k,v]of Object.entries(D.ratings))if(typeof r[k]!=='number')r[k]=v;upd.ratings=r}
           if(Object.keys(upd).length)await savePlace(p.id,upd)}
-        close();draftStore.clear();toast(failed?`Memory saved. ${failed} photo${failed>1?'s':''} couldn’t upload (try JPEG or PNG).`:'Memory saved');
+        close();draftStore.clear();toast('Memory saved');if(!m.id)confetti();
       }catch(e){btn.disabled=false;btn.textContent='Save memory';toast('Could not save. Check your connection and try again.')}};
   })}
 async function compress(file){if(!file.type.startsWith('image/')||file.type==='image/gif')return file;
@@ -621,11 +943,13 @@ async function compress(file){if(!file.type.startsWith('image/')||file.type==='i
     return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',.86))}catch(e){return file}}
 
 function openMemory(id){const m=S.memories.find(x=>x.id===id);if(!m)return;const p=place(m.placeId);
-  openModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><span class="eyebrow">${esc(p?.name||'')} · ${fmtDate(m.date)}</span><h2>${esc(m.title)}</h2></div><button class="btn sm" id="m-fav" aria-pressed="${!!m.favorite}" style="${m.favorite?'color:var(--sun)':''}">${ICON.star} ${m.favorite?'Favourite':'Favourite?'}</button></div>
+  const note=(l,c,a)=>a?.length?`<div class="note ${c}"><b class="h">${l}</b><ul class="bul">${a.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:'';
+  const notes=note('Best bits','y',m.highlights)+note('Not so great','p',m.lows)+note('Tips & takeaways','b',m.takeaways);
+  openModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><span class="eyebrow">${esc(p?.name||'')} · ${fmtDate(m.date)}</span><h2>${esc(m.title)}</h2></div><button class="btn sm" id="m-fav" aria-pressed="${!!m.favorite}" style="${m.favorite?'background:var(--sun);color:var(--on)':''}">${ICON.star} ${m.favorite?'Favourite':'Favourite?'}</button></div>
   ${m.photos?.length?`<div class="gallery">${m.photos.map(ph=>`<img src="${blob(ph)}" alt="" data-full="${ph}">`).join('')}</div>`:''}
   ${m.body?`<p style="font-size:17px;margin:0">${esc(m.body)}</p>`:''}
-  ${m.highlights?.length||m.takeaways?.length?`<div class="row2">${m.highlights?.length?`<div class="ai-box"><span class="eyebrow">Highlights</span><ul class="bul">${m.highlights.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}${m.takeaways?.length?`<div class="ai-box"><span class="eyebrow">Takeaways</span><ul class="bul">${m.takeaways.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}</div>`:''}
-  ${m.tags?.length?`<div class="chips">${m.tags.map(t=>`<span class="pill">${esc(t)}</span>`).join('')}</div>`:''}
+  ${notes?`<div class="notes3" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">${notes}</div>`:''}
+  ${m.tags?.length?`<div class="chips">${m.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
   ${m.transcript?`<details><summary class="muted" style="cursor:pointer">What I said</summary><p style="white-space:pre-wrap">${esc(m.transcript)}</p></details>`:''}
   <div class="foot"><button class="btn ghost" id="m-del" style="color:var(--visit);margin-right:auto">Delete</button>${p?`<button class="btn" id="m-place">Open ${esc(p.name)}</button>`:''}<button class="btn primary" id="m-edit">Edit</button></div>`,(el,close)=>{
     const q=s=>el.querySelector(s);
@@ -654,7 +978,7 @@ document.addEventListener('click',async e=>{const a=e.target.closest('[data-act]
   case'cancel-pick':S.pick=null;$('#pick').hidden=true;break;
   case'rate':{const p=place(id);const v=+a.dataset.v;const r={...(p.ratings||{})};if(r[a.dataset.k]===v)delete r[a.dataset.k];else r[a.dataset.k]=v;p.ratings=r;renderPanel();savePlace(id,{ratings:r});break}
   case'add-year':openAddYear(id);break;
-  case'mark-visited':{const p=place(id);const y=new Date().getFullYear();await savePlace(id,{status:'visited',years:(p.years||[]).length?p.years:[y]});toast(`${p.name} moved to Been there`);break}
+  case'mark-visited':{const p=place(id);const y=new Date().getFullYear();await savePlace(id,{status:'visited',years:(p.years||[]).length?p.years:[y]});toast(`${p.name} moved to Been there`);confetti();break}
   case'todo-toggle':{const p=place(id);savePlace(id,{todo:(p.todo||[]).map(t=>t.id===a.dataset.tid?{...t,done:a.checked}:t)});break}
   case'todo-del':{e.preventDefault();const p=place(id);savePlace(id,{todo:(p.todo||[]).filter(t=>t.id!==a.dataset.tid)});break}
   case'suggest':{const p=place(id);S.suggestions[id]='loading';rerender();
@@ -673,6 +997,16 @@ ${ms.map(m=>`- ${m.date}: ${m.title}. ${m.body} Highlights: ${(m.highlights||[])
   case'del-place':{if(a.dataset.armed!=='1'){a.dataset.armed='1';a.textContent='Tap again: deletes the place and its memories';return}
     try{for(const m of memsOf(id)){await B.delMem(m.id);for(const ph of m.photos||[])B.photo?.del(ph).catch(()=>{})}await B.delPlace(id);S.sel=null;toast('Deleted')}catch(err){toast('Could not delete. Try again.')}break}
   case'clear-examples':{try{for(const m of S.memories.filter(x=>x.example))await B.delMem(m.id);for(const p of S.places.filter(x=>x.example))await B.delPlace(p.id);S.sel=null;toast('Examples removed')}catch(err){toast('Could not remove them. Try again.')}break}
+  case'open-country':{const f=G.features.find(x=>String(x.id)===a.dataset.cid);if(!f){selectPlace(id,true);break}
+    S.sel={type:'country',id:f.id,name:f.properties.name};const c=d3.geoCentroid(f);flyTo(c[0],c[1],Math.max(G.k,2));renderPanel();render();$('#panel').scrollTop=0;break}
+  case'del-year':{const p=place(id);if(a.dataset.armed!=='1'){a.dataset.armed='1';a.textContent='remove '+a.dataset.y+'?';setTimeout(()=>{if(a.isConnected){a.dataset.armed='';a.textContent=a.dataset.y}},3000);break}
+    savePlace(id,{years:(p.years||[]).filter(y=>String(y)!==a.dataset.y)});break}
+  case'quick-add':{const p=place(id);a.classList.add('gone');p.todo=[...(p.todo||[]),{id:uid(),text:a.dataset.name,type:a.dataset.type,done:p.status==='visited'}];savePlace(id,{todo:p.todo});break}
+  case'recs-more':S.recsOpen[id]=!S.recsOpen[id];rerender();break;
+  case'shuffle':{const ms=S.memories;if(ms.length)openMemory(ms[Math.floor(Math.random()*ms.length)].id);break}
+  case'tl-year':$('#tl-'+a.dataset.y)?.scrollIntoView({behavior:'smooth',block:'start'});break;
+  case'tl-play':tlPlay();break;
+  case'tl-order':S.tlOrder=S.tlOrder==='asc'?'desc':'asc';renderTimeline();$('#v-timeline').scrollTop=0;break;
   case'settings':openSettings();break;
   case'sync-now':if(B.sync?.status()==='auth')openSettings();else B.sync?.now();break;
   case'jfilter':S.journalFilter=a.dataset.f;renderJournal();break;
@@ -685,11 +1019,13 @@ document.addEventListener('submit',e=>{const f=e.target.closest('[data-form="tod
 
 /* ---------- routing ---------- */
 function go(v){if(location.hash!=='#'+v)location.hash=v;else route()}
-function route(){const v=(location.hash||'#globe').slice(1);S.view=['globe','journal','rankings','wishlist'].includes(v)?v:'globe';
+const VIEWS=['globe','timeline','journal','rankings','wishlist'];
+function route(){const v=(location.hash||'#globe').slice(1),prev=S.view;S.view=VIEWS.includes(v)?v:'globe';
   document.querySelectorAll('nav.tabs a').forEach(a=>a.toggleAttribute('aria-current',false)||a.dataset.tab===S.view&&a.setAttribute('aria-current','page'));
-  ['globe','journal','rankings','wishlist'].forEach(k=>$('#v-'+k).hidden=k!==S.view);rerender();if(S.view==='globe'){resize();render()}}
+  VIEWS.forEach(k=>$('#v-'+k).hidden=k!==S.view);rerender();if(S.view==='globe'){resize();render()}
+  if(prev!==S.view)enter($('#v-'+S.view))}
 window.addEventListener('hashchange',route);
-function rerender(){renderStats();if(S.view==='globe'){renderPanel();renderModes();render()}else if(S.view==='journal')renderJournal();else if(S.view==='rankings')renderRankings();else renderWishlist()}
+function rerender(){renderStats();if(S.view==='globe'){renderPanel();renderModes();render()}else if(S.view==='timeline')renderTimeline();else if(S.view==='journal')renderJournal();else if(S.view==='rankings')renderRankings();else renderWishlist()}
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{renderModes();render();rerender()});
 new MutationObserver(()=>{renderModes();render()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
@@ -714,31 +1050,67 @@ const TAGWORDS={'Food':CATWORDS.food,'People':['met','friend','friends','locals'
 const hasWord=(low,w)=>new RegExp('(^|[^a-z])'+w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|[^a-z])').test(low);
 function sentiment(low){let s=0;for(const w of POS)if(hasWord(low,w))s+=STRONG.includes(w)?2:1;for(const w of NEG)if(hasWord(low,w))s-=1;
   if(s>0&&/(^|[^a-z])(not|never|wasn't|isn't|weren't|aren't|didn't|don't)($|[^a-z])/.test(low))s=-1;return s}
-function sentences(text){const clean=text.replace(/\b(u+m+|u+h+|e+r+m+|you know|i mean)\b,?\s*/gi,'').replace(/\s+/g,' ').trim();
+const FILL=/\b(u+m+|u+h+|e+r+m*|you know|i mean|basically|literally|honestly|to be honest|sort of|i guess|like i said)\b,?\s*/gi;
+const TAKE_RE=/(^|[^a-z])(next time|should|shouldn't|recommend|tip|tips|learned|learnt|avoid|worth|need to|wish|make sure|go back|if you|book ahead|in advance|don't bother|skip)($|[^a-z])/;
+function sentences(text){const clean=text.replace(FILL,'').replace(/\s+/g,' ').trim();
   let parts=clean.split(/(?<=[.!?])\s+|\n+/);
-  parts=parts.flatMap(p=>p.split(' ').length>34?p.split(/,?\s+(?:and then|and after that|after that|then)\s+/i):[p]);
-  return parts.map(p=>p.trim().replace(/^(so|and|well|okay|ok|but)[, ]+/i,'')).filter(p=>p.split(' ').length>=3).map(p=>p.charAt(0).toUpperCase()+p.slice(1))}
+  parts=parts.flatMap(p=>p.split(' ').length>26?p.split(/,?\s+(?:and then|and after that|after that|and also|then we|then i|but then)\s+/i):[p]);
+  return parts.map(p=>p.trim().replace(/^(so|and|well|okay|ok|but|also|then|anyway|yeah|oh)[, ]+/i,'')).filter(p=>p.split(' ').length>=3).map(p=>p.charAt(0).toUpperCase()+p.slice(1))}
 const clip=(s,n)=>{const w=s.replace(/[.!?]+$/,'').split(' ');return w.length<=n?w.join(' '):w.slice(0,n).join(' ').replace(/[,;:]$/,'')+'…'};
+/* One spoken thought, tidied into a short point for a sticky note. */
+function point(s){let t=s.trim().replace(/^(and|but|so|also|then)\s+/i,'').replace(/^(i think|i thought|i feel like|i felt like|we thought|i would say|i'd say|it was just)[, ]+/i,'')
+    .replace(/^(the |my |our )?(best|favourite|favorite|worst|coolest|funniest) (moment|part|bit|thing|memory)( of (the|our|my) \w+)? (was|is) (definitely |probably )?(that |when |how )?/i,'');
+  return clip(t.charAt(0).toUpperCase()+t.slice(1),14)}
+function tipPoint(s){const t=s.replace(/^next time[, ]+/i,'').replace(/^((i|we|you)('d| would)? (should|need to|have to|must)( definitely| really)?|i('d| would) (definitely )?recommend|make sure( to| you)?|remember to|definitely)\s+/i,'');return point(t)}
+/* Spoken sentences run several thoughts together; split them where a new one starts. */
+function clauses(s){const sub='(?:we|i|the|it|they|my|our|there|that|this|he|she|everyone|everything)\\b';
+  const parts=s.split(new RegExp('[,;]\\s+(?=(?:and |but |so )?'+sub+')|\\s+(?:and|but)\\s+(?='+sub+')','i')).map(x=>x.trim().replace(/[.!?]+$/,'')).filter(Boolean);
+  return parts.length>1&&parts.every(x=>x.split(' ').length>=3)?parts:[s]}
+function uniqPoints(a){const seen=new Set();return a.filter(x=>{const k=x.toLowerCase().split(' ').slice(0,6).join(' ');if(!x||seen.has(k))return false;seen.add(k);return true})}
 function organiseLocally(text){
-  const ss=sentences(text);if(!ss.length)return{title:clip(text,7),summary:text.trim(),highlights:[],takeaways:[],tags:['Moment'],ratings:{}};
+  const ss=sentences(text);if(!ss.length)return{title:clip(text,7),summary:text.trim(),highlights:[],lows:[],takeaways:[],tags:['Moment'],ratings:{}};
   const sc=ss.map(s=>({s,low:s.toLowerCase(),v:sentiment(s.toLowerCase())}));
-  const top=[...sc].filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,4);const highlights=sc.filter(x=>top.includes(x)).map(x=>clip(x.s,16));
-  const takeRe=/(^|[^a-z])(next time|should|recommend|tip|learned|learnt|avoid|worth|need to|wish|definitely|make sure|go back|if you|don't)($|[^a-z])/;
-  const takeaways=sc.filter(x=>takeRe.test(x.low)&&!top.includes(x)).slice(0,3).map(x=>clip(x.s,18));
+  const tips=sc.filter(x=>TAKE_RE.test(x.low)).slice(0,4);
+  const un=sc.filter(x=>!tips.includes(x)).flatMap(x=>clauses(x.s)).map(s=>({s,low:s.toLowerCase(),v:sentiment(s.toLowerCase())}));
+  const top=[...un].filter(x=>x.v>0).sort((a,b)=>b.v-a.v).slice(0,5);
+  const anyCat=x=>Object.values(CATWORDS).some(ws=>ws.some(w=>hasWord(x.low,w)));
+  const extra=top.length<3?un.filter(x=>x.v===0&&anyCat(x)).slice(0,3-top.length):[];
+  const highlights=uniqPoints(un.filter(x=>top.includes(x)||extra.includes(x)).map(x=>point(x.s)));
+  const lows=uniqPoints(un.filter(x=>x.v<0).slice(0,4).map(x=>point(x.s)));
+  const takeaways=uniqPoints(tips.map(x=>tipPoint(x.s)));
   const stop=/\s+(and|the|a|an|of|in|to|with|at|on|for|was|were|is|we|i|it|that|this|my|our|so|but)$/i;
-  let title=clip((top[0]||sc[0]).s.replace(/^(today|yesterday|this morning|tonight|last night|then|after that)[, ]+/i,'').split(/[,;]| and | but | because /)[0],7).replace(/…$/,'');while(stop.test(title))title=title.replace(stop,'');
+  let title=clip(point((top[0]||sc[0]).s).replace(/…$/,'').replace(/^(today|yesterday|this morning|tonight|last night|then|after that)[, ]+/i,'').split(/[,;]| and | but | because /)[0],7).replace(/…$/,'');while(stop.test(title))title=title.replace(stop,'');
   title=title.charAt(0).toUpperCase()+title.slice(1);
   let summary='';for(const x of sc){if((summary+' '+x.s).split(' ').length>60&&summary)break;summary+=(summary?' ':'')+x.s.replace(/[.!?]*$/,'.')}
   const low=text.toLowerCase();const tags=Object.entries(TAGWORDS).filter(([,ws])=>ws.some(w=>hasWord(low,w))).map(([t])=>t);
   const ratings={};
-  const clauses=sc.flatMap(x=>x.s.split(/[,;]| but | and /)).map(c=>c.toLowerCase().trim()).filter(Boolean).map(c=>({low:c,v:sentiment(c)}));
-  for(const[k,ws]of Object.entries(CATWORDS)){const hit=clauses.filter(x=>ws.some(w=>hasWord(x.low,w)));if(!hit.length)continue;
+  const bits=sc.flatMap(x=>x.s.split(/[,;]| but | and /)).map(c=>c.toLowerCase().trim()).filter(Boolean).map(c=>({low:c,v:sentiment(c)}));
+  for(const[k,ws]of Object.entries(CATWORDS)){const hit=bits.filter(x=>ws.some(w=>hasWord(x.low,w)));if(!hit.length)continue;
     const num=hit.map(x=>x.low.match(/(\d{1,2})\s*(?:\/|out of)\s*10/)).find(Boolean);
     if(num){ratings[k]=Math.max(1,Math.min(10,+num[1]));continue}
     if(k==='live'){ratings[k]=/wouldn't|couldn't|would not|could not|never/.test(hit.map(x=>x.low).join(' '))?3:8;continue}
     const v=hit.reduce((a,x)=>a+x.v,0);
     if(v>=2)ratings[k]=9;else if(v===1)ratings[k]=8;else if(v===-1)ratings[k]=4;else if(v<=-2)ratings[k]=3}
-  return{title,summary,highlights,takeaways,tags:tags.length?tags:['Moment'],ratings}}
+  return{title,summary,highlights,lows,takeaways,tags:tags.length?tags:['Moment'],ratings}}
+/* Which of the "things worth mentioning" has been covered so far. */
+function coverage(text){const low=text.toLowerCase(),c=new Set(),any=ws=>ws.some(w=>hasWord(low,w));
+  if(STRONG.some(w=>hasWord(low,w))||/best (bit|part|moment|thing)|highlight/.test(low))c.add('best');
+  if(any(CATWORDS.food))c.add('food');
+  if(any(CATWORDS.people)||any(TAGWORDS.People)||/\bwith (my|our|a|some|the) /.test(low))c.add('people');
+  if(any(CATWORDS.sights)||any(CATWORDS.nature)||any(TAGWORDS['Sport & events'])||/\b(saw|visited|went to|walked|watched|explored)\b/.test(low))c.add('saw');
+  if(any(CATWORDS.vibe)||/\b(felt|feel|feeling|feels)\b/.test(low))c.add('feel');
+  if(any(CATWORDS.live))c.add('live');
+  if(TAKE_RE.test(low))c.add('tips');
+  return c}
+/* "back in 2019", "three years ago", "last March": when the memory is from, if they said. */
+function dateFromText(text){const low=text.toLowerCase(),cy=new Date().getFullYear();let y=null;
+  const m=low.match(/\b(19[5-9]\d|20\d{2})\b/);
+  if(m&&+m[1]<=cy)y=+m[1];else if(/\blast year\b/.test(low))y=cy-1;
+  else{const a=low.match(/\b(\d{1,2}|a|one|two|three|four|five|six|seven|eight|nine|ten|a couple of|a few)\s+years?\s+(ago|back)\b/);
+    if(a){const n={a:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,'a couple of':2,'a few':3}[a[1]]??+a[1];if(n>0&&n<70)y=cy-n}}
+  let mo=null;const MN=['january','february','march','april','may','june','july','august','september','october','november','december'];
+  for(let i=0;i<12;i++)if(new RegExp('\\b(in|last|this|early|late|mid|of|during)\\s+'+MN[i]+'\\b').test(low)){mo=i+1;break}
+  return y||mo?{y:y||cy,mo}:null}
 function summariseLocally(p,ms){const uniq=a=>[...new Set(a.map(x=>x.trim()).filter(Boolean))];const fav=[...ms].sort((a,b)=>(b.favorite?1:0)-(a.favorite?1:0));
   const ys=uniq(ms.map(m=>(m.date||'').slice(0,4))).sort();
   const lead=fav.slice(0,2).map(m=>(m.body||'').split(/(?<=[.!?])\s+/)[0]).filter(Boolean).join(' ');
@@ -898,7 +1270,7 @@ function localDictation(){const SR=window.SpeechRecognition||window.webkitSpeech
 function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
   let key='';try{key=localStorage.getItem('wb_key')||''}catch(e){}
   openModal(`<h2>Settings</h2>
-  <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Optional. Wonderbook organises your notes on this device with no key. Adding your own Claude API key (from console.anthropic.com) gives better write-ups and switches on Suggest things to do. It is saved only in this browser and sent only to Anthropic.</p>
+  <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Optional. Wonderbook organises your notes on this device with no key. Adding your own Claude API key (from console.anthropic.com) gives better write-ups and switches on “Ask Claude for more ideas”. It is saved only in this browser and sent only to Anthropic.</p>
   <label class="field">Claude API key<input type="password" id="set-key" value="${esc(key)}" placeholder="sk-ant-…" autocomplete="off"></label>
   <div style="display:flex;gap:8px"><button class="btn primary" id="set-save">Save key</button>${key?'<button class="btn" id="set-clear">Remove key</button>':''}</div></div>
   <div class="panel-card" id="set-sync"></div>
@@ -932,7 +1304,7 @@ function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
   const timer=setTimeout(()=>{if(S.dbState==='loading'){S.dbState='error';rerender()}},10000);
   try{B=window.claude?.use?await artifactBackend(window.claude):await localBackend()}
   catch(e){S.dbState='error'}
-  rerender();
+  S.panelKey='';rerender();enter($('#v-'+S.view));
   const reopen=n=>{const d=draftStore.get();if(!d||$('.overlay'))return;if(S.dbState!=='ready'){if(n>0)setTimeout(()=>reopen(n-1),700);return}
     const mem=d.id?S.memories.find(x=>x.id===d.id):undefined;if(d.id&&!mem){draftStore.clear();return}if(S.places.length)openComposer({mem})};
   setTimeout(()=>reopen(8),500);

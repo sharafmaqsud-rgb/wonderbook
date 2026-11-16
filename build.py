@@ -5,7 +5,7 @@ root = pathlib.Path(__file__).parent
 body = (root / "index.html").read_text()
 head = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FF2A85">
+<meta name="theme-color" content="#F7EFDD">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wonderbook">
 <meta name="robots" content="noindex">
