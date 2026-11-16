@@ -1,0 +1,775 @@
+<title>Wonderbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a living globe is the hero; a side journal panel (bottom sheet on phones) shows what you tap. */
+:root{
+  --bg:#F3F6FD; --surface:#FFFFFF; --surface-2:#EBF0FA; --ink:#121A33; --ink-2:#56608A; --line:#DAE1F0;
+  --ocean:#D3ECFB; --ocean-2:#9FD3F4; --land:#F7F9FD; --land-line:#C3CEE4;
+  --visit:#FF5B3A; --visit-2:#FF2A85; --wish:#7A5CFF; --sun:#FFBE2E; --mint:#11B5A4;
+  --glow:rgba(70,140,230,.28); --shadow:0 10px 30px rgba(30,45,90,.10);
+  --font-display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --font-body:'DM Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --font-mono:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --r:18px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#090E1E; --surface:#111A33; --surface-2:#18233F; --ink:#EEF2FF; --ink-2:#9AA5CB; --line:#253152;
+  --ocean:#0E1C3B; --ocean-2:#173263; --land:#1E2A48; --land-line:#34426C;
+  --visit:#FF6A4A; --visit-2:#FF3D93; --wish:#9580FF; --sun:#FFC948; --mint:#22CDBB;
+  --glow:rgba(90,130,255,.35); --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#090E1E; --surface:#111A33; --surface-2:#18233F; --ink:#EEF2FF; --ink-2:#9AA5CB; --line:#253152;
+  --ocean:#0E1C3B; --ocean-2:#173263; --land:#1E2A48; --land-line:#34426C;
+  --visit:#FF6A4A; --visit-2:#FF3D93; --wish:#9580FF; --sun:#FFC948; --mint:#22CDBB;
+  --glow:rgba(90,130,255,.35); --shadow:0 10px 30px rgba(0,0,0,.35); color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;overflow:hidden}
+*{box-sizing:border-box}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--wish);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)}
+.app{height:100%;display:flex;flex-direction:column}
+
+/* Header */
+header.top{display:flex;align-items:center;gap:16px;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--surface);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{width:34px;height:34px;border-radius:50%;background:conic-gradient(from 200deg,var(--visit-2),var(--visit),var(--sun),var(--mint),var(--wish),var(--visit-2));position:relative;flex:none}
+.brand-mark::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--surface)}
+.brand h1{font-size:23px;font-weight:800}
+nav.tabs{display:flex;gap:4px;background:var(--surface-2);padding:4px;border-radius:999px}
+nav.tabs a{padding:7px 14px;border-radius:999px;text-decoration:none;color:var(--ink-2);font-weight:500;font-size:14px}
+nav.tabs a[aria-current="page"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 8px rgba(20,30,70,.10)}
+.stats{display:flex;gap:18px;margin-left:auto;align-items:baseline}
+.stat b{font-family:var(--font-display);font-size:20px;font-weight:800;display:block;line-height:1.1}
+.stat span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff;border:0;box-shadow:0 6px 18px rgba(255,60,110,.30)}
+.btn.violet{background:var(--wish);color:#fff;border:0}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:5px 11px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:16px;height:16px}
+
+/* Main */
+main{flex:1;min-height:0;position:relative}
+.view{position:absolute;inset:0}
+.globe-view{display:grid;grid-template-columns:minmax(0,1fr) 420px}
+.globe-wrap{position:relative;min-width:0;min-height:0;overflow:hidden;touch-action:none}
+.globe-wrap svg{width:100%;height:100%;display:block;cursor:grab}
+.globe-wrap svg:active{cursor:grabbing}
+.sphere{filter:drop-shadow(0 24px 60px var(--glow))}
+.country{stroke:var(--land-line);stroke-width:.5;transition:fill .5s}
+.country:hover{filter:brightness(1.06);stroke:var(--ink-2)}
+.country.sel{stroke:var(--ink);stroke-width:1.4}
+.grat{fill:none;stroke:var(--ocean-2);stroke-width:.5;opacity:.6}
+.city{cursor:pointer}
+.city .dot{stroke:var(--surface);stroke-width:2}
+.city.wish .dot{fill:var(--surface);stroke:var(--wish);stroke-width:2.5}
+.city.visited .dot{fill:var(--visit-2)}
+.city .ring{fill:none;stroke:var(--visit-2);stroke-width:2;opacity:0}
+.city.wish .ring{stroke:var(--wish)}
+.city.sel .ring{animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{r:6;opacity:.9}100%{r:22;opacity:0}}
+.city text{font-family:var(--font-display);font-weight:700;font-size:12px;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:3px;pointer-events:none}
+.globe-ui{position:absolute;display:flex;gap:8px;align-items:center}
+.globe-ui.tl{top:14px;left:max(14px,env(safe-area-inset-left,0px));flex-wrap:wrap;right:70px}
+.globe-ui.br{bottom:14px;right:14px;flex-direction:column}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:500;color:var(--ink-2)}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.zoom-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface);font-size:20px;line-height:1;box-shadow:var(--shadow)}
+.legend{position:absolute;left:max(14px,env(safe-area-inset-left,0px));bottom:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:12px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;max-width:260px}
+.legend .row{display:flex;align-items:center;gap:8px}
+.sw{width:14px;height:14px;border-radius:4px;flex:none}
+.ramp{height:10px;border-radius:6px;width:160px}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--surface);font-size:12px;font-weight:500;padding:4px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-140%);opacity:0;transition:opacity .15s}
+.pick-banner{position:absolute;top:60px;left:50%;transform:translateX(-50%);background:var(--wish);color:#fff;padding:8px 16px;border-radius:999px;font-weight:500;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;max-width:calc(100% - 32px)}
+
+/* Panel */
+.panel{background:var(--surface);border-left:1px solid var(--line);overflow-y:auto;min-width:0;padding:22px 22px 120px}
+.panel h2{font-size:28px;font-weight:800;line-height:1.1}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);font-weight:700}
+.stack{display:flex;flex-direction:column;gap:16px}
+.section{display:flex;flex-direction:column;gap:10px;padding-top:18px;border-top:1px solid var(--line);margin-top:4px}
+.section-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.section-h h3{font-size:17px;font-weight:700}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.pill.visited{background:color-mix(in srgb,var(--visit-2) 14%,transparent);color:var(--visit-2)}
+.pill.wish{background:color-mix(in srgb,var(--wish) 16%,transparent);color:var(--wish)}
+.back{background:none;border:0;color:var(--ink-2);padding:0;font-weight:500;display:inline-flex;gap:4px;align-items:center}
+.cover{width:100%;aspect-ratio:16/9;max-width:100%;object-fit:cover;border-radius:var(--r)}
+.scorecard{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.score-tile{border-radius:16px;padding:14px;background:var(--surface-2)}
+.score-tile b{font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1;display:block}
+.score-tile span{font-size:12px;color:var(--ink-2)}
+.score-tile.hot{background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff}
+.score-tile.hot span{color:rgba(255,255,255,.85)}
+.rate-row{display:grid;grid-template-columns:120px minmax(0,1fr) 28px;align-items:center;gap:10px;font-size:14px}
+.rate-row .lbl{font-weight:500}
+.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:3px}
+.segs button{height:18px;border:0;border-radius:4px;background:var(--surface-2);padding:0}
+.segs button.on{background:var(--c)}
+.segs button:hover{outline:1.5px solid var(--ink-2)}
+.rate-row .val{text-align:right;font-weight:700}
+.list{display:flex;flex-direction:column;gap:8px}
+.mem-row{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;padding:8px;border-radius:14px;border:1px solid var(--line);background:var(--surface);text-align:left;width:100%}
+.mem-row:hover{border-color:var(--ink-2)}
+.thumb{width:56px;height:56px;border-radius:10px;object-fit:cover;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2);font-family:var(--font-display);font-weight:800;font-size:20px}
+.mem-row .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mem-row .s{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ul.bul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.ai-box{border-radius:16px;padding:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--wish) 12%,transparent),color-mix(in srgb,var(--mint) 12%,transparent));display:flex;flex-direction:column;gap:8px}
+.todo{display:grid;grid-template-columns:22px minmax(0,1fr) auto auto;gap:8px;align-items:center;font-size:14px}
+.todo input{width:18px;height:18px;accent-color:var(--mint)}
+.todo.done .txt{text-decoration:line-through;color:var(--ink-2)}
+.type{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.type.sport{background:color-mix(in srgb,var(--mint) 18%,transparent);color:var(--mint)}
+.type.landmark{background:color-mix(in srgb,var(--sun) 25%,transparent);color:color-mix(in srgb,var(--sun) 50%,var(--ink))}
+.type.event{background:color-mix(in srgb,var(--visit-2) 15%,transparent);color:var(--visit-2)}
+.type.food{background:color-mix(in srgb,var(--visit) 15%,transparent);color:var(--visit)}
+.x{border:0;background:none;color:var(--ink-2);font-size:18px;line-height:1;padding:2px 6px}
+.add-row{display:flex;gap:6px}
+.add-row input{flex:1;min-width:0}
+.field{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:500;color:var(--ink-2);min-width:0}
+input[type=text],input[type=date],input[type=number],select,textarea{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:9px 12px;font-size:15px;width:100%;color:var(--ink)}
+textarea{resize:vertical;min-height:80px;line-height:1.5}
+.place-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--surface);width:100%;text-align:left}
+.place-row:hover{border-color:var(--ink-2)}
+.place-row .nm{font-weight:700;flex:1;min-width:0}
+.dotc{width:10px;height:10px;border-radius:50%;flex:none}
+.empty{border:1.5px dashed var(--line);border-radius:var(--r);padding:22px;text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:10px;align-items:center}
+.banner{background:color-mix(in srgb,var(--sun) 22%,var(--surface));border:1px solid color-mix(in srgb,var(--sun) 50%,transparent);border-radius:14px;padding:10px 14px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+
+/* Full-page views */
+.page{overflow-y:auto;padding-block:28px 120px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page-inner{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.page-h{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.page-h h2{font-size:40px;font-weight:800;line-height:1}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.year-h{font-family:var(--font-display);font-size:30px;font-weight:800;color:var(--ink-2);margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);overflow:hidden;text-align:left;padding:0;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.card .ph{aspect-ratio:4/3;width:100%;object-fit:cover;background:var(--surface-2)}
+.card .ph.none{display:grid;place-items:center;font-family:var(--font-display);font-size:44px;font-weight:800;color:#fff}
+.card .body{padding:14px;display:flex;flex-direction:column;gap:6px}
+.card .t{font-family:var(--font-display);font-weight:700;font-size:18px;line-height:1.2}
+.card .meta{font-size:13px;color:var(--ink-2)}
+.otd{border-radius:var(--r);padding:18px;background:linear-gradient(120deg,var(--sun),var(--visit));color:#2a1200;display:flex;gap:16px;align-items:center;text-align:left;border:0}
+.otd img{width:84px;height:84px;border-radius:14px;object-fit:cover}
+.rank-list{display:flex;flex-direction:column;gap:8px}
+.rank{display:grid;grid-template-columns:44px minmax(0,1.2fr) minmax(0,2fr) 48px;gap:12px;align-items:center;padding:10px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);text-align:left;width:100%}
+.rank .n{font-family:var(--font-display);font-weight:800;font-size:22px;color:var(--ink-2)}
+.rank:nth-child(1) .n{color:var(--sun)}.rank:nth-child(2) .n{color:var(--ink-2)}.rank:nth-child(3) .n{color:var(--visit)}
+.bar{height:12px;border-radius:6px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:6px}
+.rank .v{font-family:var(--font-display);font-weight:800;font-size:20px;text-align:right}
+.h2h{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.h2h-row{display:grid;grid-template-columns:minmax(0,1fr) 120px minmax(0,1fr);gap:10px;align-items:center;font-size:14px}
+.h2h-row .l .bar{direction:rtl}
+.h2h-row .c{text-align:center;font-weight:500;color:var(--ink-2)}
+.panel-card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:14px}
+.wish-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.wish-card{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.wish-card h3{font-size:24px;font-weight:800}
+.sugg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--surface-2);font-size:14px}
+
+/* Modal */
+.overlay{position:fixed;inset:0;background:rgba(8,12,30,.5);display:grid;place-items:center;z-index:50;padding:16px;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border-radius:24px;width:min(680px,100%);max-height:calc(100% - 20px);overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:16px;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.modal h2{font-size:26px;font-weight:800}
+.modal .foot{display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:-24px;background:var(--surface);padding:12px 0 4px;margin-bottom:-4px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mic-zone{display:flex;gap:16px;align-items:center;padding:16px;border-radius:18px;background:var(--surface-2)}
+.mic{width:64px;height:64px;border-radius:50%;border:0;background:linear-gradient(135deg,var(--visit),var(--visit-2));color:#fff;display:grid;place-items:center;flex:none;box-shadow:0 8px 24px rgba(255,50,110,.35);position:relative}
+.mic svg{width:28px;height:28px}
+.mic.live::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--visit-2);animation:ring 1.2s ease-out infinite}
+@keyframes ring{from{transform:scale(.9);opacity:1}to{transform:scale(1.3);opacity:0}}
+.partial{font-style:italic;color:var(--ink-2);font-size:14px;min-height:1.5em}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.photos .ph-item{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--surface-2)}
+.photos .ph-item img{width:100%;height:100%;object-fit:cover}
+.photos .ph-item button{position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;line-height:1}
+.photo-add{aspect-ratio:1;border-radius:12px;border:1.5px dashed var(--line);display:grid;place-items:center;color:var(--ink-2);font-size:13px;text-align:center;cursor:pointer;padding:6px}
+.tagbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px}
+.tagbtn[aria-pressed="true"]{background:var(--mint);color:#fff;border-color:var(--mint)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.gallery img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:12px;cursor:zoom-in}
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:60;display:grid;place-items:center;padding:20px}
+.lightbox img{max-width:100%;max-height:100%;border-radius:12px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:999px;font-weight:500;z-index:70;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
+.spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seg-toggle{display:inline-flex;background:var(--surface-2);border-radius:999px;padding:3px}
+.seg-toggle button{border:0;background:none;border-radius:999px;padding:6px 14px;font-weight:500;color:var(--ink-2)}
+.seg-toggle button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 2px 6px rgba(0,0,0,.08)}
+
+@media (max-width:900px){
+  .stats{display:none}
+  .globe-view{grid-template-columns:1fr;grid-template-rows:52% 48%}
+  .panel{border-left:0;border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px max(16px,env(safe-area-inset-right,0px)) 120px max(16px,env(safe-area-inset-left,0px))}
+  nav.tabs{position:fixed;bottom:calc(10px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);z-index:40;box-shadow:var(--shadow);border:1px solid var(--line)}
+  .actions{margin-left:auto}
+  .actions .btn .lbl{display:none}
+  .legend{display:none}
+  .page-h h2{font-size:32px}
+  .rank{grid-template-columns:34px minmax(0,1fr) 44px}
+  .rank .bar{grid-column:2/3;grid-row:2}
+  .row2{grid-template-columns:1fr}
+  .wish-grid{grid-template-columns:1fr}
+  .h2h-row{grid-template-columns:minmax(0,1fr) 84px minmax(0,1fr);font-size:12px}
+  .modal{padding:18px;border-radius:20px}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"></div><h1>Wonderbook</h1></div>
+    <nav class="tabs" aria-label="Sections">
+      <a href="#globe" data-tab="globe">Globe</a>
+      <a href="#journal" data-tab="journal">Journal</a>
+      <a href="#rankings" data-tab="rankings">Rankings</a>
+      <a href="#wishlist" data-tab="wishlist">Wishlist</a>
+    </nav>
+    <div class="stats" id="stats"></div>
+    <div class="actions">
+      <button class="btn" data-act="settings" title="Settings and backup" id="btn-settings" hidden aria-label="Settings and backup"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg></button>
+      <button class="btn" data-act="add-place" title="Add a place"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg><span class="lbl">Add place</span></button>
+      <button class="btn primary" data-act="new-memory" title="New memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span class="lbl">New memory</span></button>
+    </div>
+  </header>
+  <main>
+    <section class="view globe-view" id="v-globe">
+      <div class="globe-wrap" id="globe">
+        <div class="globe-ui tl" id="modes"></div>
+        <div class="globe-ui br">
+          <button class="zoom-btn" data-act="zoom-in" aria-label="Zoom in">+</button>
+          <button class="zoom-btn" data-act="zoom-out" aria-label="Zoom out">−</button>
+          <button class="zoom-btn" data-act="zoom-reset" aria-label="Reset view" style="font-size:15px">⟲</button>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="tip" id="tip"></div>
+        <div class="pick-banner" id="pick" hidden></div>
+      </div>
+      <aside class="panel" id="panel" aria-live="polite"></aside>
+    </section>
+    <section class="view page" id="v-journal" hidden></section>
+    <section class="view page" id="v-rankings" hidden></section>
+    <section class="view page" id="v-wishlist" hidden></section>
+  </main>
+</div>
+<div id="layer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+"use strict";
+/* ---------- constants ---------- */
+const CATS=[
+  {k:'live',label:'Could I live here?',short:'Live here'},
+  {k:'food',label:'Food',short:'Food'},
+  {k:'people',label:'People',short:'People'},
+  {k:'sights',label:'Attractions',short:'Attractions'},
+  {k:'nature',label:'Nature',short:'Nature'},
+  {k:'nightlife',label:'Nightlife',short:'Nightlife'},
+  {k:'value',label:'Value for money',short:'Value'},
+  {k:'safety',label:'Safety',short:'Safety'},
+  {k:'transport',label:'Getting around',short:'Getting around'},
+  {k:'vibe',label:'Vibe',short:'Vibe'}];
+const TAGS=['Moment','Food','People','Sport & events','Nature','Culture','Nightlife','Adventure'];
+const TODO_TYPES=['landmark','sport','event','experience','food','nature'];
+const PLACES='wb/journal/places', MEMS='wb/journal/memories';
+const WORLD=195;
+
+/* ---------- state ---------- */
+const S={places:[],memories:[],db:null,assets:null,sample:null,dict:null,user:null,
+  loaded:{p:false,m:false},dbState:'loading',view:'globe',sel:null,mode:'visited',
+  journalFilter:'All',rankCat:'overall',rankBy:'cities',h2h:[null,null],
+  suggestions:{},dictTarget:null,pick:null};
+
+/* ---------- helpers ---------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-5);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const blob=id=>B.url(id);
+const fmtDate=s=>{if(!s)return'';const d=new Date(s+'T12:00:00');return isNaN(d)?s:d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const place=id=>S.places.find(p=>p.id===id);
+const memsOf=id=>S.memories.filter(m=>m.placeId===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+function overall(p){const v=CATS.map(c=>p.ratings?.[c.k]).filter(x=>typeof x==='number');return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+function score(p,k){return k==='overall'?overall(p):(typeof p.ratings?.[k]==='number'?p.ratings[k]:null)}
+const f1=n=>n==null?'–':(Math.round(n*10)/10).toFixed(n%1===0?0:1);
+function toast(msg,ms=3200){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
+function rateColor(v){const s=d3.scaleLinear().domain([1,5.5,10]).range([css('--sun'),css('--visit'),css('--visit-2')]).interpolate(d3.interpolateLab);return s(v)}
+function initials(s){return (s||'?').trim().charAt(0).toUpperCase()}
+function gradFor(s){const cs=['--visit','--visit-2','--wish','--mint','--sun'];let h=0;for(const c of (s||''))h=(h*31+c.charCodeAt(0))>>>0;const a=css(cs[h%5]),b=css(cs[(h+2)%5]);return `linear-gradient(135deg,${a},${b})`}
+function aiErr(e){const c=e?.code;if(c==='no_key'||c==='bad_key'){openSettings();return c==='bad_key'?'That API key was rejected. Check it and try again.':'Add your Claude API key to switch on the AI features.'}if(c==='not_granted')return'AI is switched off for Wonderbook. Turn it on in the page’s Permissions menu.';if(c==='rate_limited')return'AI is busy right now. Try again in a minute.';return'AI could not finish that. Try again.'}
+const ICON={mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+stop:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>',
+spark:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8z"/></svg>',
+star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>'};
+
+/* ---------- db ---------- */
+async function savePlace(id,data){try{await B.updatePlace(id,data)}catch(e){toast('Could not save. Try again.')}}
+function countryForPoint(lng,lat){for(const f of G.features){if(d3.geoContains(f,[lng,lat]))return f}return null}
+
+/* ---------- globe ---------- */
+const G={rot:[-10,-22,0],k:1,last:{x:0,y:0,k:1},features:[],spin:null,w:0,h:0,base:1};
+async function initGlobe(){
+  const wrap=$('#globe');
+  const svg=d3.select(wrap).insert('svg',':first-child').attr('role','img').attr('aria-label','Interactive globe of places you have visited');
+  const defs=svg.append('defs');
+  const rg=defs.append('radialGradient').attr('id','oc').attr('cx','38%').attr('cy','32%').attr('r','75%');
+  rg.append('stop').attr('offset','0%').attr('style','stop-color:var(--ocean)');
+  rg.append('stop').attr('offset','100%').attr('style','stop-color:var(--ocean-2)');
+  G.svg=svg;G.proj=d3.geoOrthographic().clipAngle(90).precision(.4);G.path=d3.geoPath(G.proj);
+  G.sphere=svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('fill','url(#oc)');
+  G.grat=svg.append('path').datum(d3.geoGraticule10()).attr('class','grat');
+  G.gC=svg.append('g');G.gP=svg.append('g');
+  try{
+    const topo=await fetch('countries-110m.json').then(r=>r.json());
+    G.features=topojson.feature(topo,topo.objects.countries).features.filter(f=>f.properties.name!=='Antarctica');
+  }catch(e){G.features=[];toast('The world map did not load. Reload the page to try again.')}
+  G.countries=G.gC.selectAll('path').data(G.features,d=>d.id).join('path').attr('class','country')
+    .on('click',(ev,d)=>onCountryClick(ev,d))
+    .on('mousemove',(ev,d)=>showTip(ev,d.properties.name)).on('mouseleave',hideTip);
+  G.zoom=d3.zoom().scaleExtent([1,16]).clickDistance(6)
+    .on('start',ev=>{if(ev.sourceEvent)stopSpin()})
+    .on('zoom',ev=>{const t=ev.transform;
+      if(ev.sourceEvent&&Math.abs(G.last.k-t.k)<1e-6){const s=.28/t.k;G.rot[0]+=(t.x-G.last.x)*s;G.rot[1]=Math.max(-85,Math.min(85,G.rot[1]-(t.y-G.last.y)*s))}
+      G.last={x:t.x,y:t.y,k:t.k};G.k=t.k;render()});
+  svg.call(G.zoom).on('dblclick.zoom',null);
+  new ResizeObserver(()=>{resize();render()}).observe(wrap);
+  resize();startSpin();
+}
+function resize(){if(!G.svg)return;const r=$('#globe').getBoundingClientRect();G.w=r.width;G.h=r.height;G.base=Math.min(r.width,r.height)/2*.86;G.svg.attr('viewBox',`0 0 ${r.width} ${r.height}`)}
+function startSpin(){stopSpin();if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;G.spin=d3.timer(()=>{G.rot[0]+=.07;render()})}
+function stopSpin(){if(G.spin){G.spin.stop();G.spin=null}}
+function visibleAt(lng,lat){return d3.geoDistance([lng,lat],[-G.rot[0],-G.rot[1]])<Math.PI/2-.02}
+function render(){
+  if(!G.proj||!G.w)return;
+  G.proj.translate([G.w/2,G.h/2]).scale(G.base*G.k).rotate(G.rot);
+  G.sphere.attr('d',G.path);G.grat.attr('d',G.path);
+  const agg=countryAgg();
+  G.countries.attr('d',G.path).attr('fill',d=>fillFor(agg.get(d.id))).classed('sel',d=>S.sel?.type==='country'&&S.sel.id===d.id);
+  const pts=S.places.filter(p=>typeof p.lat==='number'&&p.kind!=='country');
+  const g=G.gP.selectAll('g.city').data(pts,d=>d.id).join(en=>{const e=en.append('g').attr('class','city');e.append('circle').attr('class','ring').attr('r',6);e.append('circle').attr('class','dot');e.append('text').attr('dx',9).attr('dy',4);e.on('click',(ev,d)=>{ev.stopPropagation();selectPlace(d.id,true)}).on('mousemove',(ev,d)=>showTip(ev,d.name)).on('mouseleave',hideTip);return e});
+  g.attr('class',d=>`city ${d.status==='wishlist'?'wish':'visited'}${S.sel?.type==='place'&&S.sel.id===d.id?' sel':''}`)
+   .attr('display',d=>visibleAt(d.lng,d.lat)?null:'none')
+   .attr('transform',d=>{const p=G.proj([d.lng,d.lat]);return p?`translate(${p[0]},${p[1]})`:null});
+  g.select('.dot').attr('r',d=>S.sel?.id===d.id?7:Math.min(6,3.5+G.k*.4));
+  g.select('text').text(d=>(G.k>=2.4||S.sel?.id===d.id)?d.name:'');
+}
+function countryAgg(){const m=new Map();for(const p of S.places){if(!p.countryId)continue;let a=m.get(p.countryId);if(!a){a={visited:false,wish:false,sc:[],live:[],years:[]};m.set(p.countryId,a)}
+  if(p.status==='visited'){a.visited=true;const o=overall(p);if(o!=null)a.sc.push(o);if(typeof p.ratings?.live==='number')a.live.push(p.ratings.live);(p.years||[]).forEach(y=>a.years.push(+y))}else a.wish=true}
+  for(const a of m.values()){a.avg=a.sc.length?d3.mean(a.sc):null;a.liveAvg=a.live.length?d3.mean(a.live):null;a.first=a.years.length?d3.min(a.years):null}return m}
+function yearRange(){const ys=S.places.flatMap(p=>p.status==='visited'?(p.years||[]).map(Number):[]);return ys.length?[d3.min(ys),d3.max(ys)]:[2020,2026]}
+function fillFor(a){const land=css('--land');if(!a)return land;
+  if(!a.visited)return a.wish?d3.color(css('--wish')).copy({opacity:.45})+'':land;
+  if(S.mode==='visited')return css('--visit');
+  if(S.mode==='rating')return a.avg!=null?rateColor(a.avg):d3.color(css('--visit')).copy({opacity:.35})+'';
+  if(S.mode==='live')return a.liveAvg!=null?rateColor(a.liveAvg):d3.color(css('--visit')).copy({opacity:.35})+'';
+  if(S.mode==='year'){const [a0,a1]=yearRange();if(a.first==null)return d3.color(css('--visit')).copy({opacity:.35})+'';const t=a1===a0?1:(a.first-a0)/(a1-a0);return d3.interpolateLab(css('--mint'),css('--wish'))(t)}
+  return css('--visit')}
+function flyTo(lng,lat,k){stopSpin();const r0=G.rot.slice(),r1=[-lng,-lat,0],k0=G.k,k1=k??Math.max(G.k,3.2);
+  const ri=d3.interpolate(r0,r1);
+  d3.transition().duration(1100).ease(d3.easeCubicInOut).tween('fly',()=>t=>{G.rot=ri(t);G.k=k0+(k1-k0)*t;render()})
+   .on('end',()=>{G.svg.call(G.zoom.transform,d3.zoomIdentity.translate(G.last.x,G.last.y).scale(G.k))})}
+function zoomBy(f){stopSpin();const k1=Math.max(1,Math.min(16,G.k*f));const k0=G.k;d3.transition().duration(350).tween('z',()=>t=>{G.k=k0+(k1-k0)*t;render()}).on('end',()=>G.svg.call(G.zoom.transform,d3.zoomIdentity.translate(G.last.x,G.last.y).scale(G.k)))}
+function showTip(ev,txt){const t=$('#tip');const r=$('#globe').getBoundingClientRect();t.textContent=txt;t.style.left=(ev.clientX-r.left)+'px';t.style.top=(ev.clientY-r.top)+'px';t.style.opacity=1}
+function hideTip(){$('#tip').style.opacity=0}
+function onCountryClick(ev,d){
+  if(S.pick){const [lng,lat]=G.proj.invert(d3.pointer(ev,G.svg.node()));finishPick(lng,lat,d);return}
+  S.sel={type:'country',id:d.id,name:d.properties.name};const c=d3.geoCentroid(d);flyTo(c[0],c[1],Math.max(G.k,2));renderPanel();render()}
+function renderModes(){const modes=[['visited','Visited'],['rating','Rating'],['live','Live here'],['year','First visit']];
+  $('#modes').innerHTML=modes.map(([k,l])=>`<button class="chip" data-act="mode" data-mode="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join('');
+  const lg=$('#legend');const ramp=`<div class="ramp" style="background:linear-gradient(90deg,${rateColor(1)},${rateColor(5.5)},${rateColor(10)})"></div>`;
+  const wish=`<div class="row"><span class="sw" style="background:${d3.color(css('--wish')).copy({opacity:.45})}"></span>Want to go</div>`;
+  if(S.mode==='visited')lg.innerHTML=`<div class="row"><span class="sw" style="background:var(--visit)"></span>Been there</div>${wish}`;
+  else if(S.mode==='year'){const [a,b]=yearRange();lg.innerHTML=`<div class="row mono">${a}<div class="ramp" style="background:linear-gradient(90deg,var(--mint),var(--wish))"></div>${b}</div>${wish}`}
+  else lg.innerHTML=`<div>${S.mode==='rating'?'Average rating':'Could I live here?'}</div><div class="row mono">1${ramp}10</div>${wish}`}
+
+/* ---------- pick on globe (fallback when AI can't place a city) ---------- */
+function startPick(draft){S.pick=draft;go('globe');const b=$('#pick');b.hidden=false;b.innerHTML=`Tap the map where ${esc(draft.name)} is <button class="btn sm" data-act="cancel-pick">Cancel</button>`}
+function finishPick(lng,lat,feature){const d=S.pick;S.pick=null;$('#pick').hidden=true;createPlace({...d,lat,lng,country:d.country||feature?.properties.name||'',countryId:feature?.id||null})}
+$('#globe').addEventListener('click',ev=>{if(!S.pick||ev.target.closest('.country,button'))return;const p=G.proj.invert(d3.pointer(ev,G.svg.node()));if(p)finishPick(p[0],p[1],countryForPoint(p[0],p[1]))});
+
+/* ---------- panel ---------- */
+function selectPlace(id,fly){const p=place(id);if(!p)return;S.sel={type:'place',id};if(S.view!=='globe')go('globe');if(fly&&typeof p.lat==='number')flyTo(p.lng,p.lat,Math.max(G.k,p.kind==='country'?2:3.4));renderPanel();render();$('#panel').scrollTop=0}
+function renderPanel(){const el=$('#panel');
+  if(S.dbState!=='ready'){el.innerHTML=dbStateHTML();return}
+  if(S.sel?.type==='place'&&place(S.sel.id))el.innerHTML=placeHTML(place(S.sel.id));
+  else if(S.sel?.type==='country')el.innerHTML=countryHTML(S.sel);
+  else el.innerHTML=overviewHTML()}
+function dbStateHTML(){if(S.dbState==='loading')return`<div class="stack"><span class="eyebrow">Wonderbook</span><h2>Opening your journal…</h2><p class="muted"><span class="spinner"></span></p></div>`;
+  if(S.dbState==='private')return`<div class="stack"><span class="eyebrow">Private</span><h2>This journal is private</h2><p class="muted">Only its owner can open the memories in Wonderbook.</p></div>`;
+  return`<div class="stack"><span class="eyebrow">Can’t connect</span><h2>Your journal didn’t load</h2><p class="muted">Reload the page to try again.</p></div>`}
+function exampleBanner(){return S.places.some(p=>p.example)||S.memories.some(m=>m.example)?`<div class="banner"><span>Some entries are examples to show how Wonderbook works.</span><button class="btn sm" data-act="clear-examples">Remove examples</button></div>`:''}
+function overviewHTML(){
+  const v=S.places.filter(p=>p.status==='visited'),w=S.places.filter(p=>p.status==='wishlist');
+  const top=v.filter(p=>overall(p)!=null).sort((a,b)=>overall(b)-overall(a)).slice(0,5);
+  const recent=[...S.memories].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,4);
+  if(!S.places.length)return`<div class="stack"><span class="eyebrow">Welcome</span><h2>Start your Wonderbook</h2><p class="muted">Add the first place you’ve been. It lights up on the globe, and you can add memories, photos and ratings to it.</p><div class="empty"><b>No places yet</b><button class="btn primary" data-act="add-place">Add your first place</button></div></div>`;
+  return`<div class="stack">${exampleBanner()}<div><span class="eyebrow">Your world</span><h2>${(n=>n+(n===1?' country':' countries'))(countryCount())}, ${(n=>n+(n===1?' city':' cities'))(v.filter(p=>p.kind!=='country').length)}</h2><p class="muted">Spin the globe, tap a country or a pin to open its page.</p></div>
+  <div class="section"><div class="section-h"><h3>Top rated</h3><a class="btn sm ghost" href="#rankings">All rankings</a></div><div class="list">${top.length?top.map((p,i)=>placeRow(p,`<span class="mono" style="font-weight:700">${f1(overall(p))}</span>`)).join(''):'<p class="muted">Rate a place to see it here.</p>'}</div></div>
+  <div class="section"><div class="section-h"><h3>Latest memories</h3><a class="btn sm ghost" href="#journal">Journal</a></div><div class="list">${recent.length?recent.map(memRow).join(''):'<p class="muted">No memories yet. Tap “New memory” and talk about a trip.</p>'}</div></div>
+  <div class="section"><div class="section-h"><h3>Want to go</h3><a class="btn sm ghost" href="#wishlist">Wishlist</a></div><div class="list">${w.length?w.slice(0,5).map(p=>placeRow(p,'')).join(''):'<p class="muted">Nothing on your wishlist yet.</p>'}</div></div></div>`}
+function placeRow(p,right){return`<button class="place-row" data-act="open-place" data-id="${p.id}"><span class="dotc" style="background:${p.status==='wishlist'?'var(--wish)':'var(--visit-2)'}"></span><span class="nm">${esc(p.name)}<span class="muted" style="font-weight:400"> · ${esc(p.kind==='country'?'Country':p.country)}</span></span>${right}</button>`}
+function memRow(m){const p=place(m.placeId);return`<button class="mem-row" data-act="open-memory" data-id="${m.id}">${m.photos?.length?`<img class="thumb" src="${blob(m.photos[0])}" alt="" loading="lazy">`:`<span class="thumb" style="background:${gradFor(m.title)};color:#fff">${esc(initials(m.title))}</span>`}<span style="min-width:0"><div class="t">${esc(m.title||'Untitled memory')}</div><div class="s">${esc(p?.name||'')} · ${fmtDate(m.date)}</div></span></button>`}
+function countryHTML(sel){const ps=S.places.filter(p=>p.countryId===sel.id);const vis=ps.filter(p=>p.status==='visited');const avg=d3.mean(vis.map(overall).filter(x=>x!=null));
+  return`<div class="stack"><button class="back" data-act="home">‹ Your world</button><div><span class="eyebrow">Country</span><h2>${esc(sel.name)}</h2>
+  <p>${vis.length?`<span class="pill visited">Been there</span>`:ps.length?`<span class="pill wish">Want to go</span>`:`<span class="pill">Not yet</span>`} ${avg!=null?`<span class="pill">Average ${f1(avg)}/10</span>`:''}</p></div>
+  <div class="list">${ps.length?ps.map(p=>placeRow(p,overall(p)!=null?`<span class="mono" style="font-weight:700">${f1(overall(p))}</span>`:'')).join(''):'<p class="muted">No places here yet.</p>'}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="add-place" data-country="${esc(sel.name)}" data-status="visited">Add a city I’ve been to</button><button class="btn" data-act="add-place" data-country="${esc(sel.name)}" data-status="wishlist">Add to wishlist</button></div></div>`}
+function ratingsHTML(p){return CATS.map(c=>{const v=p.ratings?.[c.k];return`<div class="rate-row"><span class="lbl">${c.label}</span><div class="segs" role="group" aria-label="${c.label}">${Array.from({length:10},(_,i)=>`<button class="${typeof v==='number'&&i<v?'on':''}" style="--c:${rateColor(v||1)}" data-act="rate" data-id="${p.id}" data-k="${c.k}" data-v="${i+1}" aria-label="${c.label} ${i+1} out of 10"></button>`).join('')}</div><span class="val mono">${v??'–'}</span></div>`}).join('')}
+function todoHTML(p){const items=p.todo||[];return`<div class="list">${items.map(t=>`<label class="todo ${t.done?'done':''}"><input type="checkbox" ${t.done?'checked':''} data-act="todo-toggle" data-id="${p.id}" data-tid="${t.id}"><span class="txt">${esc(t.text)}</span><span class="type ${t.type}">${esc(t.type)}</span><button class="x" data-act="todo-del" data-id="${p.id}" data-tid="${t.id}" aria-label="Remove">×</button></label>`).join('')||'<p class="muted" style="margin:0">Nothing here yet.</p>'}</div>
+  <form class="add-row" data-form="todo" data-id="${p.id}"><input type="text" name="text" placeholder="A landmark, team, event, or thing to do" aria-label="New item"><select name="type" aria-label="Type" style="width:auto">${TODO_TYPES.map(t=>`<option>${t}</option>`).join('')}</select><button class="btn sm" type="submit">Add</button></form>
+  ${suggHTML(p)}`}
+function suggHTML(p){const s=S.suggestions[p.id];if(s==='loading')return`<p class="muted"><span class="spinner"></span> Finding the best things to do…</p>`;
+  if(Array.isArray(s))return`<div class="list">${s.map((it,i)=>`<div class="sugg"><span><b>${esc(it.name)}</b> <span class="type ${esc(it.type)}">${esc(it.type)}</span><br><span class="muted" style="font-size:13px">${esc(it.note||'')}</span></span><button class="btn sm" data-act="sugg-add" data-id="${p.id}" data-i="${i}">Add</button></div>`).join('')}</div>`;
+  return B.hasAI()?`<button class="btn sm" style="align-self:flex-start" data-act="suggest" data-id="${p.id}">${ICON.spark} Suggest things to do</button>`:''}
+function placeHTML(p){const ms=memsOf(p.id);const o=overall(p);const cover=p.coverId||ms.find(m=>m.photos?.length)?.photos[0];const visited=p.status==='visited';
+  return`<div class="stack">${p.example?exampleBanner():''}<button class="back" data-act="home">‹ Your world</button>
+  ${cover?`<img class="cover" src="${blob(cover)}" alt="">`:''}
+  <div><span class="eyebrow">${esc(p.kind==='country'?'Country':p.country)}</span><h2>${esc(p.name)}</h2>
+  <p style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0">${visited?'<span class="pill visited">Been there</span>':'<span class="pill wish">Want to go</span>'}${(p.years||[]).sort().map(y=>`<span class="pill mono">${esc(y)}</span>`).join('')}${visited?`<button class="btn sm ghost" data-act="add-year" data-id="${p.id}">+ year</button>`:''}</p></div>
+  ${visited?`<div class="scorecard"><div class="score-tile hot"><b class="mono">${f1(o)}</b><span>Overall</span></div><div class="score-tile"><b class="mono">${f1(p.ratings?.live)}</b><span>Could I live here?</span></div></div>`:`<button class="btn primary" data-act="mark-visited" data-id="${p.id}">I went! Move to Been there</button>`}
+  <div class="section"><div class="section-h"><h3>Memories</h3><button class="btn sm primary" data-act="new-memory" data-id="${p.id}">+ Memory</button></div>
+  <div class="list">${ms.length?ms.map(memRow).join(''):`<div class="empty">Tap the mic and talk about ${esc(p.name)}. Wonderbook turns it into a journal entry.<button class="btn sm primary" data-act="new-memory" data-id="${p.id}">${ICON.mic} Record a memory</button></div>`}</div></div>
+  ${ms.length?`<div class="section"><div class="section-h"><h3>Takeaways</h3>${B.hasAI()?`<button class="btn sm" data-act="summarise" data-id="${p.id}">${ICON.spark} ${p.ai?'Refresh':'Summarise'}</button>`:''}</div>
+  ${p.ai?`<div class="ai-box"><p style="margin:0">${esc(p.ai.summary)}</p>${p.ai.highlights?.length?`<div><span class="eyebrow">Highlights</span><ul class="bul">${p.ai.highlights.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}${p.ai.takeaways?.length?`<div><span class="eyebrow">Takeaways</span><ul class="bul">${p.ai.takeaways.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}</div>`:'<p class="muted" style="margin:0">Summarise your memories here into highlights and takeaways.</p>'}</div>`:''}
+  ${visited?`<div class="section"><div class="section-h"><h3>Ratings</h3><span class="muted" style="font-size:12px">Tap to rate, tap again to clear</span></div>${ratingsHTML(p)}</div>`:''}
+  <div class="section"><div class="section-h"><h3>${visited?'Things I did or want to do':'Things to do'}</h3></div>${todoHTML(p)}</div>
+  <div class="section"><button class="btn sm ghost" data-act="del-place" data-id="${p.id}" style="color:var(--visit);align-self:flex-start">Delete ${esc(p.name)}</button></div></div>`}
+function countryCount(){const s=new Set(S.places.filter(p=>p.status==='visited').map(p=>p.countryId||p.country));return s.size}
+function renderStats(){const v=S.places.filter(p=>p.status==='visited');const c=countryCount();
+  $('#stats').innerHTML=[[c,'countries'],[v.filter(p=>p.kind!=='country').length,'cities'],[Math.round(c/WORLD*100)+'%','of the world'],[S.memories.length,'memories']].map(([a,b])=>`<div class="stat"><b class="mono">${a}</b><span>${b}</span></div>`).join('')}
+
+/* ---------- journal ---------- */
+function renderJournal(){const el=$('#v-journal');
+  let ms=[...S.memories].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  const f=S.journalFilter;if(f==='Favourites')ms=ms.filter(m=>m.favorite);else if(f!=='All')ms=ms.filter(m=>(m.tags||[]).includes(f));
+  const md=today().slice(5);const otd=S.memories.find(m=>m.date&&m.date.slice(5)===md&&m.date.slice(0,4)<today().slice(0,4));
+  const byYear=d3.groups(ms,m=>(m.date||'').slice(0,4)||'Undated');
+  el.innerHTML=`<div class="page-inner">${exampleBanner()}<div class="page-h"><div><span class="eyebrow">${S.memories.length} memories</span><h2>Journal</h2></div><button class="btn primary" data-act="new-memory">${ICON.mic} New memory</button></div>
+  ${otd?`<button class="otd" data-act="open-memory" data-id="${otd.id}">${otd.photos?.length?`<img src="${blob(otd.photos[0])}" alt="">`:''}<span><span class="eyebrow" style="color:inherit">On this day, ${otd.date.slice(0,4)}</span><h3 style="font-size:22px">${esc(otd.title)}</h3><span>${esc(place(otd.placeId)?.name||'')}</span></span></button>`:''}
+  <div class="chips">${['All','Favourites',...TAGS].map(t=>`<button class="chip" data-act="jfilter" data-f="${esc(t)}" aria-pressed="${f===t}">${esc(t)}</button>`).join('')}</div>
+  ${byYear.length?byYear.map(([y,arr])=>`<div class="year-h mono">${esc(y)}</div><div class="grid">${arr.map(memCard).join('')}</div>`).join(''):`<div class="empty"><b>No memories here yet</b>Talk about a trip and Wonderbook writes it up for you.<button class="btn primary" data-act="new-memory">${ICON.mic} Record a memory</button></div>`}</div>`}
+function memCard(m){const p=place(m.placeId);return`<button class="card" data-act="open-memory" data-id="${m.id}">${m.photos?.length?`<img class="ph" src="${blob(m.photos[0])}" alt="" loading="lazy">`:`<div class="ph none" style="background:${gradFor(p?.name||m.title)}">${esc(initials(p?.name))}</div>`}<div class="body"><span class="meta">${esc(p?.name||'Somewhere')} · ${fmtDate(m.date)}${m.favorite?' · <span style="color:var(--sun)">★</span>':''}</span><span class="t">${esc(m.title||'Untitled memory')}</span><span class="meta" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${esc(m.body||m.transcript||'')}</span></div></button>`}
+
+/* ---------- rankings ---------- */
+function renderRankings(){const el=$('#v-rankings');const k=S.rankCat;
+  let rows;
+  if(S.rankBy==='cities')rows=S.places.filter(p=>p.status==='visited').map(p=>({id:p.id,name:p.name,sub:p.kind==='country'?'Country':p.country,v:score(p,k)})).filter(r=>r.v!=null);
+  else rows=d3.groups(S.places.filter(p=>p.status==='visited'),p=>p.country).map(([c,ps])=>({id:ps[0].id,name:c,sub:`${ps.length} place${ps.length>1?'s':''}`,v:d3.mean(ps.map(p=>score(p,k)).filter(x=>x!=null))})).filter(r=>r.v!=null);
+  rows.sort((a,b)=>b.v-a.v);
+  const rated=S.places.filter(p=>p.status==='visited'&&overall(p)!=null);
+  if(!S.h2h[0]&&rated[0])S.h2h[0]=rated[0].id;if(!S.h2h[1]&&rated[1])S.h2h[1]=rated[1].id;
+  const A=place(S.h2h[0]),B=place(S.h2h[1]);
+  el.innerHTML=`<div class="page-inner"><div class="page-h"><div><span class="eyebrow">Your scores, out of 10</span><h2>Rankings</h2></div><div class="seg-toggle"><button data-act="rankby" data-v="cities" aria-pressed="${S.rankBy==='cities'}">Cities</button><button data-act="rankby" data-v="countries" aria-pressed="${S.rankBy==='countries'}">Countries</button></div></div>
+  <div class="chips">${[{k:'overall',short:'Overall'},...CATS].map(c=>`<button class="chip" data-act="rankcat" data-k="${c.k}" aria-pressed="${k===c.k}">${c.short}</button>`).join('')}</div>
+  <div class="rank-list">${rows.length?rows.map((r,i)=>`<button class="rank" data-act="open-place" data-id="${r.id}"><span class="n mono">${i+1}</span><span style="min-width:0"><b>${esc(r.name)}</b><br><span class="muted" style="font-size:13px">${esc(r.sub)}</span></span><span class="bar"><i style="width:${r.v*10}%;background:${rateColor(r.v)}"></i></span><span class="v mono">${f1(r.v)}</span></button>`).join(''):`<div class="empty">Rate the places you’ve been and they’ll rank here.</div>`}</div>
+  ${rated.length>=2?`<div class="panel-card"><div class="section-h"><h3 style="font-size:22px">Head to head</h3></div><div class="h2h">${[0,1].map(i=>`<select data-act="h2h" data-i="${i}" aria-label="Place ${i+1}">${rated.map(p=>`<option value="${p.id}" ${S.h2h[i]===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select>`).join('')}</div>
+  ${A&&B?[{k:'overall',short:'Overall'},...CATS].map(c=>{const a=score(A,c.k),b=score(B,c.k);return`<div class="h2h-row"><div class="l" style="display:flex;gap:8px;align-items:center;justify-content:flex-end"><b class="mono">${f1(a)}</b><span class="bar" style="flex:1"><i style="width:${(a||0)*10}%;margin-left:auto;background:${a!=null&&b!=null&&a>=b?'var(--visit-2)':'var(--ink-2)'}"></i></span></div><span class="c">${c.short}</span><div style="display:flex;gap:8px;align-items:center"><span class="bar" style="flex:1"><i style="width:${(b||0)*10}%;background:${a!=null&&b!=null&&b>=a?'var(--wish)':'var(--ink-2)'}"></i></span><b class="mono">${f1(b)}</b></div></div>`}).join(''):''}</div>`:''}</div>`}
+
+/* ---------- wishlist ---------- */
+function renderWishlist(){const el=$('#v-wishlist');const w=S.places.filter(p=>p.status==='wishlist');
+  el.innerHTML=`<div class="page-inner"><div class="page-h"><div><span class="eyebrow">${w.length} places</span><h2>Where next</h2></div><button class="btn violet" data-act="add-place" data-status="wishlist">+ Dream destination</button></div>
+  ${w.length?`<div class="wish-grid">${w.map(p=>{const t=p.todo||[];return`<div class="wish-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div style="min-width:0"><span class="eyebrow">${esc(p.kind==='country'?'Country':p.country)}</span><h3>${esc(p.name)}</h3></div><span class="pill wish mono">${t.filter(x=>x.done).length}/${t.length}</span></div>${todoHTML(p)}<div style="display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px"><button class="btn sm" data-act="open-place" data-id="${p.id}">Show on globe</button><button class="btn sm primary" data-act="mark-visited" data-id="${p.id}">I went!</button></div></div>`}).join('')}</div>`:`<div class="empty"><b>Where do you want to go next?</b>Add cities or countries, then list the landmarks, teams and events you want to see.<button class="btn violet" data-act="add-place" data-status="wishlist">+ Dream destination</button></div>`}</div>`}
+
+/* ---------- modals ---------- */
+function openModal(html,mount){const o=document.createElement('div');o.className='overlay';o.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  o.addEventListener('mousedown',e=>{if(e.target===o)closeModal(o)});$('#layer').appendChild(o);mount?.(o.firstElementChild,()=>closeModal(o));return o}
+function closeModal(o){if(S.dict?.active?.())S.dict.stop().catch(()=>{});S.dictTarget=null;o.remove()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const l=$('.lightbox');if(l)return l.remove();const o=[...document.querySelectorAll('.overlay')].pop();if(o)closeModal(o)}});
+
+function openAddPlace(opts={}){
+  let status=opts.status||'visited';
+  openModal(`<h2>Add a place</h2><p class="muted" style="margin:-8px 0 0">A city, or a whole country. Wonderbook finds it on the globe.</p>
+  <div class="seg-toggle" id="ap-st"><button type="button" data-v="visited" aria-pressed="${status==='visited'}">I’ve been</button><button type="button" data-v="wishlist" aria-pressed="${status==='wishlist'}">I want to go</button></div>
+  <div class="row2"><label class="field">City or country<input type="text" id="ap-name" placeholder="e.g. Kyoto" autocomplete="off"></label><label class="field">Country (optional)<input type="text" id="ap-country" value="${esc(opts.country||'')}" placeholder="e.g. Japan"></label></div>
+  <label class="field" id="ap-yrs-f">Years visited<input type="text" id="ap-years" placeholder="e.g. 2019, 2024" inputmode="numeric"></label>
+  <p class="muted" id="ap-msg" style="margin:0;min-height:1.5em"></p>
+  <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="ap-go">Add place</button></div>`,(m,close)=>{
+    const setSt=v=>{status=v;m.querySelectorAll('#ap-st button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));m.querySelector('#ap-yrs-f').hidden=v!=='visited'};setSt(status);
+    m.querySelector('#ap-st').onclick=e=>{const b=e.target.closest('button');if(b)setSt(b.dataset.v)};
+    m.querySelector('[data-close]').onclick=close;m.querySelector('#ap-name').focus();
+    const go=async()=>{const name=m.querySelector('#ap-name').value.trim();if(!name){m.querySelector('#ap-msg').textContent='Type a city or country name.';return}
+      const country=m.querySelector('#ap-country').value.trim();const years=(m.querySelector('#ap-years').value.match(/\d{4}/g)||[]).map(Number);
+      const btn=m.querySelector('#ap-go');btn.disabled=true;m.querySelector('#ap-msg').innerHTML='<span class="spinner"></span> Finding it on the map…';
+      const draft={name,country,status,years:status==='visited'?years:[]};
+      try{const r=await B.geocode(name,country);
+        if(!r?.found||typeof r.lat!=='number'){m.querySelector('#ap-msg').innerHTML='Couldn’t find that place. Check the spelling or add the country. <button class="btn sm" id="ap-pick">Place it on the map myself</button>';m.querySelector('#ap-pick').onclick=()=>{close();startPick(draft)};btn.disabled=false;return}
+        close();const f=countryForPoint(r.lng,r.lat)||G.features.find(x=>x.properties.name.toLowerCase()===String(r.country||'').toLowerCase());
+        createPlace({...draft,name:r.name||name,kind:r.kind==='country'?'country':'city',country:r.kind==='country'?(r.name||name):(f?.properties.name||r.country||country||''),lat:r.lat,lng:r.lng,countryId:f?.id||null});
+      }catch(e){close();startPick(draft)}};
+    m.querySelector('#ap-go').onclick=go;m.querySelector('#ap-name').onkeydown=e=>{if(e.key==='Enter')go()};
+  })}
+async function createPlace(d){const id=uid();const doc={name:d.name,kind:d.kind||'city',country:d.country||'',countryId:d.countryId||null,lat:d.lat,lng:d.lng,status:d.status,years:d.years||[],ratings:{},todo:[],createdAt:Date.now()};
+  const dup=S.places.find(p=>p.name.toLowerCase()===doc.name.toLowerCase()&&p.country===doc.country);if(dup){toast(`${dup.name} is already in your Wonderbook`);selectPlace(dup.id,true);return}
+  try{await B.setPlace(id,doc);if(!place(id))S.places.push({id,...doc});toast(`${doc.name} added`);selectPlace(id,true)}catch(e){toast('Could not save the place. Try again.')}}
+
+function openComposer(opts={}){
+  const m=opts.mem||{};
+  const D={placeId:m.placeId||opts.placeId||(S.sel?.type==='place'?S.sel.id:'')||'',photos:[...(m.photos||[])],files:[],tags:[...(m.tags||[])],ratings:null};
+  if(!S.places.length){toast('Add a place first, then add memories to it.');openAddPlace();return}
+  const opt=g=>S.places.filter(p=>p.status===g).map(p=>`<option value="${p.id}" ${D.placeId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  openModal(`<h2>${m.id?'Edit memory':'New memory'}</h2>
+  <div class="row2"><label class="field">Place<select id="c-place"><option value="">Choose a place</option><optgroup label="Been there">${opt('visited')}</optgroup><optgroup label="Want to go">${opt('wishlist')}</optgroup></select></label><label class="field">Date<input type="date" id="c-date" value="${esc(m.date||today())}"></label></div>
+  <div class="mic-zone"><button class="mic" id="c-mic" type="button" aria-label="Start talking" ${S.dict?'':'hidden'}>${ICON.mic}</button><div style="flex:1;min-width:0"><b id="c-micst">${S.dict?'Tap the mic and talk it through':'Type or paste your thoughts'}</b><div class="muted" style="font-size:13px">Ramble freely. Then tap Organise and Wonderbook writes it up.</div></div></div>
+  <label class="field">What happened<textarea id="c-tr" rows="5" placeholder="Where you went, who you were with, what you ate, how it felt…">${esc(m.transcript||'')}</textarea></label>
+  <div class="partial" id="c-partial"></div>
+  ${B.hasAI()?`<button class="btn violet" id="c-ai" type="button" style="align-self:flex-start">${ICON.spark} Organise with AI</button>`:''}
+  <label class="field">Title<input type="text" id="c-title" value="${esc(m.title||'')}" placeholder="Sunset on the Alfama rooftops"></label>
+  <label class="field">Summary<textarea id="c-body" rows="3">${esc(m.body||'')}</textarea></label>
+  <div class="row2"><label class="field">Highlights (one per line)<textarea id="c-hi" rows="4">${esc((m.highlights||[]).join('\n'))}</textarea></label><label class="field">Takeaways (one per line)<textarea id="c-tk" rows="4">${esc((m.takeaways||[]).join('\n'))}</textarea></label></div>
+  <div id="c-rates" hidden></div>
+  <div class="field">Tags<div class="chips" id="c-tags">${TAGS.map(t=>`<button type="button" class="tagbtn" data-t="${esc(t)}" aria-pressed="${D.tags.includes(t)}">${esc(t)}</button>`).join('')}</div></div>
+  <div class="field">Photos<div class="photos" id="c-photos"></div></div>
+  <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="c-save">Save memory</button></div>`,(el,close)=>{
+    const q=s=>el.querySelector(s);
+    q('[data-close]').onclick=close;
+    q('#c-tags').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;D.tags=D.tags.includes(t)?D.tags.filter(x=>x!==t):[...D.tags,t];b.setAttribute('aria-pressed',D.tags.includes(t))};
+    const drawPhotos=()=>{q('#c-photos').innerHTML=D.photos.map((id,i)=>`<div class="ph-item"><img src="${blob(id)}" alt=""><button type="button" data-rm="o${i}" aria-label="Remove photo">×</button></div>`).join('')+D.files.map((f,i)=>`<div class="ph-item"><img src="${URL.createObjectURL(f)}" alt=""><button type="button" data-rm="n${i}" aria-label="Remove photo">×</button></div>`).join('')+(B.photo?`<label class="photo-add">+ Add photos<input type="file" accept="image/*" multiple hidden id="c-file"></label>`:`<span class="muted" style="font-size:13px">Photo uploads aren’t available in this view.</span>`);
+      const fi=q('#c-file');if(fi)fi.onchange=()=>{D.files.push(...fi.files);drawPhotos()}};
+    q('#c-photos').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const v=b.dataset.rm;if(v[0]==='o')D.photos.splice(+v.slice(1),1);else D.files.splice(+v.slice(1),1);drawPhotos()};drawPhotos();
+    // dictation
+    const tr=q('#c-tr'),mic=q('#c-mic');
+    S.dictTarget={append:t=>{tr.value=(tr.value?tr.value:'')+(tr.value?t:t.trimStart())},partial:t=>{q('#c-partial').textContent=t},state:(st,reason)=>{const live=st!=='idle';mic.classList.toggle('live',live);mic.innerHTML=live?ICON.stop:ICON.mic;mic.setAttribute('aria-label',live?'Stop':'Start talking');
+      q('#c-micst').textContent=st==='listening'?'Listening… tap to stop':st==='starting'?'Starting…':st==='finishing'?'Finishing up…':(reason==='not_granted'?'Microphone is off. Type instead.':'Tap the mic and talk it through');if(!live)q('#c-partial').textContent=''}};
+    mic.onclick=()=>{if(!S.dict)return;if(S.dict.active()){S.dict.stop().catch(()=>{});return}
+      S.dict.start().catch(e=>{if(e?.code==='not_granted'){mic.hidden=true;toast('Microphone access is off. You can type instead.')}else if(e?.code==='unavailable'){mic.hidden=true}else if(e?.code!=='stopped'&&e?.code!=='dismissed')toast('Dictation stopped. Tap the mic to try again.')})};
+    // AI
+    const ai=q('#c-ai');if(ai)ai.onclick=async()=>{const text=tr.value.trim();if(text.length<10){toast('Say or type a little more first.');return}
+      if(S.dict?.active())await S.dict.stop().catch(()=>{});
+      const p=place(q('#c-place').value);ai.disabled=true;ai.innerHTML='<span class="spinner"></span> Organising…';
+      try{const r=await B.ai(`You help someone keep a personal travel journal. Below is what they said out loud (dictated, so it may ramble) about a memory${p?` in ${p.name}${p.kind==='country'?'':', '+p.country}`:''}${q('#c-date').value?` on ${q('#c-date').value}`:''}.
+Turn it into a tidy journal entry in their own voice: first person, warm, specific. Use only what they said; do not invent details.
+Return JSON only, with this shape:
+{"title": "short evocative title, at most 7 words",
+ "summary": "2 to 4 sentences, first person",
+ "highlights": ["up to 4 short phrases: the best moments"],
+ "takeaways": ["up to 3 short phrases: what they learned or felt, or advice to a friend"],
+ "tags": [only from: ${TAGS.map(t=>JSON.stringify(t)).join(', ')}],
+ "ratings": {only include keys they clearly gave an opinion on, from: live (would they live there), food, people, sights (attractions), nature, nightlife, value, safety, transport, vibe; each an integer 1-10}}
+What they said:
+"""${text.slice(0,12000)}"""`);
+        if(r.title)q('#c-title').value=r.title;if(r.summary)q('#c-body').value=r.summary;
+        if(Array.isArray(r.highlights))q('#c-hi').value=r.highlights.join('\n');if(Array.isArray(r.takeaways))q('#c-tk').value=r.takeaways.join('\n');
+        if(Array.isArray(r.tags)){D.tags=r.tags.filter(t=>TAGS.includes(t));q('#c-tags').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',D.tags.includes(b.dataset.t)))}
+        const rt=Object.fromEntries(Object.entries(r.ratings||{}).filter(([k,v])=>CATS.some(c=>c.k===k)&&Number.isFinite(+v)).map(([k,v])=>[k,Math.max(1,Math.min(10,Math.round(+v)))]));
+        if(Object.keys(rt).length){D.ratings=rt;const box=q('#c-rates');box.hidden=false;box.className='ai-box';box.innerHTML=`<span class="eyebrow">Ratings you hinted at</span><div class="chips">${Object.entries(rt).map(([k,v])=>`<span class="pill">${CATS.find(c=>c.k===k).short} <b class="mono">${v}</b></span>`).join('')}</div><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="c-apply" checked> Add these to the place’s ratings where I haven’t rated yet</label>`}
+        toast('Organised. Check it over, then save.');
+      }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise with AI`}};
+    // save
+    q('#c-save').onclick=async()=>{const placeId=q('#c-place').value;if(!placeId){toast('Choose which place this memory is from.');q('#c-place').focus();return}
+      const btn=q('#c-save');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Saving…';
+      try{const photos=[...D.photos];let failed=0;
+        for(let i=0;i<D.files.length;i++){btn.innerHTML=`<span class="spinner"></span> Uploading photo ${i+1} of ${D.files.length}…`;try{photos.push(await B.photo.upload(await compress(D.files[i])))}catch(e){failed++}}
+        const lines=s=>s.split('\n').map(x=>x.replace(/^[-•*\s]+/,'').trim()).filter(Boolean);
+        const data={placeId,date:q('#c-date').value,title:q('#c-title').value.trim()||'Untitled memory',body:q('#c-body').value.trim(),transcript:tr.value.trim(),highlights:lines(q('#c-hi').value),takeaways:lines(q('#c-tk').value),tags:D.tags,photos,updatedAt:Date.now()};
+        if(m.id)await B.updateMem(m.id,data);else await B.addMem({...data,favorite:false,createdAt:Date.now()});
+        const p=place(placeId);if(p){const upd={};
+          if(p.status==='wishlist'){upd.status='visited'}
+          const y=+(data.date||'').slice(0,4);if(y&&!(p.years||[]).map(Number).includes(y))upd.years=[...(p.years||[]),y];
+          if(D.ratings&&q('#c-apply')?.checked){const r={...(p.ratings||{})};for(const[k,v]of Object.entries(D.ratings))if(typeof r[k]!=='number')r[k]=v;upd.ratings=r}
+          if(Object.keys(upd).length)await savePlace(p.id,upd)}
+        close();toast(failed?`Memory saved. ${failed} photo${failed>1?'s':''} couldn’t upload (try JPEG or PNG).`:'Memory saved');
+      }catch(e){btn.disabled=false;btn.textContent='Save memory';toast('Could not save. Check your connection and try again.')}};
+  })}
+async function compress(file){if(!file.type.startsWith('image/')||file.type==='image/gif')return file;
+  try{const bmp=await createImageBitmap(file);const max=2200,s=Math.min(1,max/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*s);c.height=Math.round(bmp.height*s);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+    return await new Promise(r=>c.toBlob(b=>r(b||file),'image/jpeg',.86))}catch(e){return file}}
+
+function openMemory(id){const m=S.memories.find(x=>x.id===id);if(!m)return;const p=place(m.placeId);
+  openModal(`<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><span class="eyebrow">${esc(p?.name||'')} · ${fmtDate(m.date)}</span><h2>${esc(m.title)}</h2></div><button class="btn sm" id="m-fav" aria-pressed="${!!m.favorite}" style="${m.favorite?'color:var(--sun)':''}">${ICON.star} ${m.favorite?'Favourite':'Favourite?'}</button></div>
+  ${m.photos?.length?`<div class="gallery">${m.photos.map(ph=>`<img src="${blob(ph)}" alt="" data-full="${ph}">`).join('')}</div>`:''}
+  ${m.body?`<p style="font-size:17px;margin:0">${esc(m.body)}</p>`:''}
+  ${m.highlights?.length||m.takeaways?.length?`<div class="row2">${m.highlights?.length?`<div class="ai-box"><span class="eyebrow">Highlights</span><ul class="bul">${m.highlights.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}${m.takeaways?.length?`<div class="ai-box"><span class="eyebrow">Takeaways</span><ul class="bul">${m.takeaways.map(h=>`<li>${esc(h)}</li>`).join('')}</ul></div>`:''}</div>`:''}
+  ${m.tags?.length?`<div class="chips">${m.tags.map(t=>`<span class="pill">${esc(t)}</span>`).join('')}</div>`:''}
+  ${m.transcript?`<details><summary class="muted" style="cursor:pointer">What I said</summary><p style="white-space:pre-wrap">${esc(m.transcript)}</p></details>`:''}
+  <div class="foot"><button class="btn ghost" id="m-del" style="color:var(--visit);margin-right:auto">Delete</button>${p?`<button class="btn" id="m-place">Open ${esc(p.name)}</button>`:''}<button class="btn primary" id="m-edit">Edit</button></div>`,(el,close)=>{
+    const q=s=>el.querySelector(s);
+    q('#m-fav').onclick=async()=>{try{await B.updateMem(m.id,{favorite:!m.favorite});close();openMemory(m.id)}catch(e){toast('Could not save. Try again.')}};
+    q('#m-edit').onclick=()=>{close();openComposer({mem:m})};
+    if(q('#m-place'))q('#m-place').onclick=()=>{close();selectPlace(p.id,true)};
+    let armed=false;q('#m-del').onclick=async()=>{if(!armed){armed=true;q('#m-del').textContent='Tap again to delete for good';return}
+      try{await B.delMem(m.id);for(const ph of m.photos||[])B.photo?.del(ph).catch(()=>{});close();toast('Memory deleted')}catch(e){toast('Could not delete. Try again.')}};
+    el.querySelectorAll('[data-full]').forEach(img=>img.onclick=()=>{const l=document.createElement('div');l.className='lightbox';l.innerHTML=`<img src="${blob(img.dataset.full)}" alt="">`;l.onclick=()=>l.remove();document.body.appendChild(l)});
+  })}
+
+function openAddYear(id){const p=place(id);openModal(`<h2>Add a year</h2><label class="field">Year you visited ${esc(p.name)}<input type="number" id="y-v" value="${new Date().getFullYear()}" min="1950" max="2100"></label><div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="y-go">Add</button></div>`,(el,close)=>{
+  el.querySelector('[data-close]').onclick=close;el.querySelector('#y-go').onclick=()=>{const y=+el.querySelector('#y-v').value;if(y>1900&&y<2101&&!(p.years||[]).map(Number).includes(y))savePlace(id,{years:[...(p.years||[]),y]});close()}})}
+
+/* ---------- actions ---------- */
+document.addEventListener('click',async e=>{const a=e.target.closest('[data-act]');if(!a)return;const act=a.dataset.act,id=a.dataset.id;
+  switch(act){
+  case'mode':S.mode=a.dataset.mode;renderModes();render();break;
+  case'zoom-in':zoomBy(1.6);break;case'zoom-out':zoomBy(1/1.6);break;
+  case'zoom-reset':S.sel=null;flyTo(-G.rot[0],0,1);renderPanel();break;
+  case'home':S.sel=null;renderPanel();render();break;
+  case'open-place':selectPlace(id,true);break;
+  case'open-memory':openMemory(id);break;
+  case'add-place':openAddPlace({status:a.dataset.status,country:a.dataset.country});break;
+  case'new-memory':openComposer({placeId:id});break;
+  case'cancel-pick':S.pick=null;$('#pick').hidden=true;break;
+  case'rate':{const p=place(id);const v=+a.dataset.v;const r={...(p.ratings||{})};if(r[a.dataset.k]===v)delete r[a.dataset.k];else r[a.dataset.k]=v;p.ratings=r;renderPanel();savePlace(id,{ratings:r});break}
+  case'add-year':openAddYear(id);break;
+  case'mark-visited':{const p=place(id);const y=new Date().getFullYear();await savePlace(id,{status:'visited',years:(p.years||[]).length?p.years:[y]});toast(`${p.name} moved to Been there`);break}
+  case'todo-toggle':{const p=place(id);savePlace(id,{todo:(p.todo||[]).map(t=>t.id===a.dataset.tid?{...t,done:a.checked}:t)});break}
+  case'todo-del':{e.preventDefault();const p=place(id);savePlace(id,{todo:(p.todo||[]).filter(t=>t.id!==a.dataset.tid)});break}
+  case'suggest':{const p=place(id);S.suggestions[id]='loading';rerender();
+    try{const r=await B.ai(`Suggest the 8 best things to see or do in ${p.name}${p.kind==='country'?'':', '+p.country} for a traveller who loves famous landmarks, watching live sport (name specific local teams, stadiums or big annual events), great local food, and memorable experiences.
+Return JSON only: {"items":[{"name":"specific name","type":"one of: landmark, sport, event, experience, food, nature","note":"why it's worth it, at most 12 words"}]}`);
+      const have=new Set((p.todo||[]).map(t=>t.text.toLowerCase()));S.suggestions[id]=(r.items||[]).filter(it=>it?.name&&!have.has(it.name.toLowerCase())).map(it=>({...it,type:TODO_TYPES.includes(it.type)?it.type:'experience'}))}
+    catch(err){delete S.suggestions[id];toast(aiErr(err))}rerender();break}
+  case'sugg-add':{const p=place(id);const it=S.suggestions[id][+a.dataset.i];S.suggestions[id]=S.suggestions[id].filter(x=>x!==it);if(!S.suggestions[id].length)delete S.suggestions[id];
+    p.todo=[...(p.todo||[]),{id:uid(),text:it.name,type:it.type,done:false}];rerender();savePlace(id,{todo:p.todo});break}
+  case'summarise':{const p=place(id);const ms=memsOf(id);a.disabled=true;a.innerHTML='<span class="spinner"></span> Summarising…';
+    try{const r=await B.ai(`Here are someone's travel journal entries about ${p.name}. Summarise their overall experience of the place in their own voice (first person).
+Return JSON only: {"summary":"2-3 sentences","highlights":["up to 5 best moments"],"takeaways":["up to 4 lessons, feelings, or advice to a friend"]}
+Entries:
+${ms.map(m=>`- ${m.date}: ${m.title}. ${m.body} Highlights: ${(m.highlights||[]).join('; ')}. Takeaways: ${(m.takeaways||[]).join('; ')}`).join('\n').slice(0,14000)}`);
+      await savePlace(id,{ai:{summary:r.summary||'',highlights:r.highlights||[],takeaways:r.takeaways||[],updatedAt:Date.now()}})}catch(err){toast(aiErr(err));renderPanel()}break}
+  case'del-place':{if(a.dataset.armed!=='1'){a.dataset.armed='1';a.textContent='Tap again: deletes the place and its memories';return}
+    try{for(const m of memsOf(id)){await B.delMem(m.id);for(const ph of m.photos||[])B.photo?.del(ph).catch(()=>{})}await B.delPlace(id);S.sel=null;toast('Deleted')}catch(err){toast('Could not delete. Try again.')}break}
+  case'clear-examples':{try{for(const m of S.memories.filter(x=>x.example))await B.delMem(m.id);for(const p of S.places.filter(x=>x.example))await B.delPlace(p.id);S.sel=null;toast('Examples removed')}catch(err){toast('Could not remove them. Try again.')}break}
+  case'settings':openSettings();break;
+  case'jfilter':S.journalFilter=a.dataset.f;renderJournal();break;
+  case'rankcat':S.rankCat=a.dataset.k;renderRankings();break;
+  case'rankby':S.rankBy=a.dataset.v;renderRankings();break;
+  }});
+document.addEventListener('change',e=>{const a=e.target.closest('[data-act="h2h"]');if(a){S.h2h[+a.dataset.i]=a.value;renderRankings()}});
+document.addEventListener('submit',e=>{const f=e.target.closest('[data-form="todo"]');if(!f)return;e.preventDefault();const p=place(f.dataset.id);const text=f.elements.text.value.trim();if(!text)return;
+  p.todo=[...(p.todo||[]),{id:uid(),text,type:f.elements.type.value,done:false}];rerender();savePlace(p.id,{todo:p.todo})});
+
+/* ---------- routing ---------- */
+function go(v){if(location.hash!=='#'+v)location.hash=v;else route()}
+function route(){const v=(location.hash||'#globe').slice(1);S.view=['globe','journal','rankings','wishlist'].includes(v)?v:'globe';
+  document.querySelectorAll('nav.tabs a').forEach(a=>a.toggleAttribute('aria-current',false)||a.dataset.tab===S.view&&a.setAttribute('aria-current','page'));
+  ['globe','journal','rankings','wishlist'].forEach(k=>$('#v-'+k).hidden=k!==S.view);rerender();if(S.view==='globe'){resize();render()}}
+window.addEventListener('hashchange',route);
+function rerender(){renderStats();if(S.view==='globe'){renderPanel();renderModes();render()}else if(S.view==='journal')renderJournal();else if(S.view==='rankings')renderRankings();else renderWishlist()}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{renderModes();render();rerender()});
+new MutationObserver(()=>{renderModes();render()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+/* ---------- backends: the same app runs as a Claude artifact or as a standalone site ---------- */
+let B={url:()=>'',hasAI:()=>false,photo:null};
+const parseJSON=t=>{const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw{code:'bad_json'};return JSON.parse(t.slice(a,b+1))};
+function geoCountry(name){const f=G.features.find(x=>x.properties.name.toLowerCase()===name.trim().toLowerCase());if(!f)return null;const c=d3.geoCentroid(f);return{found:true,kind:'country',name:f.properties.name,country:f.properties.name,lat:c[1],lng:c[0]}}
+
+async function artifactBackend(C){
+  let sample=null;
+  const db=await C.use('db');if(!db)throw{code:'unavailable'};
+  const P=db.collection(PLACES),M=db.collection(MEMS);
+  const be={mode:'artifact',url:id=>'/_blob/'+id,photo:null,hasAI:()=>!!sample,
+    ai:async p=>{if(!sample)throw{code:'unavailable'};return sample.json(p,{modelTier:'default'})},
+    geocode:async(name,country)=>geoCountry(name)||be.ai(`Find this place for a travel journal map: "${name}"${country?`, in ${country}`:''}.
+Return JSON only: {"found": true or false, "kind": "city" or "country", "name": the usual English name (just the city or country, no region), "country": the country it is in (English common name), "lat": latitude number, "lng": longitude number}. For a country, use its geographic centre.`),
+    setPlace:(id,d)=>P.doc(id).set(d),updatePlace:(id,d)=>P.doc(id).update(d),delPlace:id=>P.doc(id).delete(),
+    addMem:d=>M.add(d),updateMem:(id,d)=>M.doc(id).update(d),delMem:id=>M.doc(id).delete()};
+  C.use('assets').then(a=>{if(a)be.photo={upload:async b=>(await a.upload(b)).id,del:id=>a.delete(id)}});
+  C.use('sample').then(x=>{sample=x;rerender()});
+  C.use('dictation').then(d=>{if(!d)return;S.dict=d;
+    d.onFinal(({text})=>S.dictTarget?.append(text));d.onPartial(({text})=>S.dictTarget?.partial(text));d.onState(({state,reason})=>S.dictTarget?.state(state,reason))});
+  const onErr=err=>{S.dbState=(err?.code==='not_granted'||err?.code==='invalid_argument')?'private':'error';rerender()};
+  const ready=()=>{if(S.loaded.p&&S.loaded.m)S.dbState='ready';rerender()};
+  P.onSnapshot(snap=>{S.places=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded.p=true;if(S.sel?.type==='place'&&!place(S.sel.id))S.sel=null;ready()},onErr);
+  M.onSnapshot(snap=>{S.memories=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded.m=true;ready()},onErr);
+  return be}
+
+async function localBackend(){
+  const idb=await new Promise((res,rej)=>{const r=indexedDB.open('wonderbook',1);r.onupgradeneeded=()=>{['places','memories','photos'].forEach(n=>r.result.createObjectStore(n))};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+  const tx=(store,mode,fn)=>new Promise((res,rej)=>{const t=idb.transaction(store,mode);const q=fn(t.objectStore(store));t.oncomplete=()=>res(q?.result);t.onerror=t.onabort=()=>rej(t.error)});
+  const all=async store=>{const keys=await tx(store,'readonly',s=>s.getAllKeys()),vals=await tx(store,'readonly',s=>s.getAll());return keys.map((k,i)=>[k,vals[i]])};
+  const P=new Map(await all('places')),M=new Map(await all('memories')),urls=new Map();
+  for(const[id,b]of await all('photos'))urls.set(id,URL.createObjectURL(b));
+  const emit=()=>{S.places=[...P].map(([id,d])=>({id,...d}));S.memories=[...M].map(([id,d])=>({id,...d}));if(S.sel?.type==='place'&&!P.has(S.sel.id))S.sel=null;rerender()};
+  const put=async(store,map,id,d)=>{const{id:_,...doc}=d;map.set(id,doc);await tx(store,'readwrite',s=>s.put(doc,id));emit()};
+  const del=async(store,map,id)=>{map.delete(id);await tx(store,'readwrite',s=>s.delete(id));emit()};
+  const be={mode:'local',url:id=>urls.get(id)||'',hasAI:()=>true,
+    photo:{upload:async b=>{const id=uid();await tx('photos','readwrite',s=>s.put(b,id));urls.set(id,URL.createObjectURL(b));return id},
+           del:async id=>{await tx('photos','readwrite',s=>s.delete(id));const u=urls.get(id);if(u)URL.revokeObjectURL(u);urls.delete(id)}},
+    ai:claudeJSON,
+    geocode:async(name,country)=>{const c=geoCountry(name);if(c)return c;
+      const r=await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=en&format=json&name='+encodeURIComponent(name)).then(r=>r.json());
+      const rs=r.results||[];if(!rs.length)return{found:false};
+      const hit=(country&&rs.find(x=>(x.country||'').toLowerCase().includes(country.toLowerCase())))||rs[0];
+      return{found:true,kind:String(hit.feature_code||'').startsWith('PCL')?'country':'city',name:hit.name,country:hit.country||country,lat:hit.latitude,lng:hit.longitude}},
+    setPlace:(id,d)=>put('places',P,id,d),updatePlace:(id,d)=>put('places',P,id,{...P.get(id),...d}),delPlace:id=>del('places',P,id),
+    addMem:d=>put('memories',M,uid(),d),updateMem:(id,d)=>put('memories',M,id,{...M.get(id),...d}),delMem:id=>del('memories',M,id),
+    exportBackup:async()=>{const photos={};for(const[id,b]of await all('photos'))photos[id]=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b)});
+      const data={app:'wonderbook',v:1,exportedAt:new Date().toISOString(),places:S.places,memories:S.memories,photos};
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=`wonderbook-backup-${today()}.json`;document.body.appendChild(a);a.click();a.remove()},
+    importBackup:async file=>{const data=JSON.parse(await file.text());if(data.app!=='wonderbook')throw new Error('not a backup');
+      for(const[id,u]of Object.entries(data.photos||{})){const b=await fetch(u).then(r=>r.blob());await tx('photos','readwrite',s=>s.put(b,id));if(!urls.has(id))urls.set(id,URL.createObjectURL(b))}
+      for(const p of data.places||[]){const{id,...d}=p;P.set(id,d);await tx('places','readwrite',s=>s.put(d,id))}
+      for(const m of data.memories||[]){const{id,...d}=m;M.set(id,d);await tx('memories','readwrite',s=>s.put(d,id))}
+      emit();return{places:(data.places||[]).length,memories:(data.memories||[]).length}}};
+  navigator.storage?.persist?.().catch(()=>{});
+  S.dict=localDictation();$('#btn-settings').hidden=false;
+  S.dbState='ready';emit();
+  if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+  return be}
+
+/* Claude API, called straight from this browser with the key the owner saved on this device. */
+async function claudeJSON(prompt){
+  let key='';try{key=localStorage.getItem('wb_key')||''}catch(e){}
+  if(!key)throw{code:'no_key'};
+  const body={model:'claude-opus-5-5',max_tokens:16000,fallbacks:'default',messages:[{role:'user',content:prompt}]};
+  const call=(b,beta)=>fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2026-10-21','anthropic-dangerous-direct-browser-access':'true',...(beta?{'anthropic-beta':'server-side-fallback-2026-07-01'}:{})},body:JSON.stringify(b)});
+  let r=await call(body,true);
+  if(r.status===400){const{fallbacks,...rest}=body;r=await call(rest,false)}
+  if(r.status===401||r.status===403)throw{code:'bad_key'};
+  if(r.status===429)throw{code:'rate_limited'};
+  if(!r.ok)throw{code:'upstream_error'};
+  const m=await r.json();
+  if(m.stop_reason==='refusal')throw{code:'refused'};
+  return parseJSON((m.content||[]).filter(b=>b.type==='text').map(b=>b.text).join(''))}
+
+/* Browser speech recognition, shaped like the artifact dictation capability. */
+function localDictation(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return null;let rec=null,on=false;
+  return{active:()=>on,
+    start:()=>new Promise((res,rej)=>{on=true;rec=new SR();rec.continuous=true;rec.interimResults=true;rec.lang=navigator.language||'en-GB';S.dictTarget?.state('starting');
+      rec.onstart=()=>{S.dictTarget?.state('listening');res()};
+      rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i];if(x.isFinal)S.dictTarget?.append(' '+x[0].transcript.trim());else interim+=x[0].transcript}S.dictTarget?.partial(interim)};
+      rec.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){on=false;rej({code:'not_granted'})}};
+      rec.onend=()=>{if(on){try{rec.start();return}catch(_){on=false}}S.dictTarget?.state('idle','stopped')};
+      try{rec.start()}catch(e){on=false;rej({code:'upstream_error'})}}),
+    stop:()=>{on=false;try{rec?.stop()}catch(_){}return Promise.resolve()}}}
+
+function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
+  let key='';try{key=localStorage.getItem('wb_key')||''}catch(e){}
+  openModal(`<h2>Settings</h2>
+  <div class="panel-card"><h3>AI features</h3><p class="muted" style="margin:0">Organising your spoken notes, summaries and suggestions use Claude. Paste your own Claude API key (from console.anthropic.com). It is saved only in this browser and sent only to Anthropic.</p>
+  <label class="field">Claude API key<input type="password" id="set-key" value="${esc(key)}" placeholder="sk-ant-…" autocomplete="off"></label>
+  <div style="display:flex;gap:8px"><button class="btn primary" id="set-save">Save key</button>${key?'<button class="btn" id="set-clear">Remove key</button>':''}</div></div>
+  <div class="panel-card"><h3>Your data</h3><p class="muted" style="margin:0" id="set-usage">Your journal and photos are stored in this browser on this device. They do not sync to other devices. Download a backup regularly, and use it to move your journal to another device.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="set-export">Download backup</button><label class="btn" style="cursor:pointer">Restore from backup<input type="file" id="set-import" accept="application/json,.json" hidden></label></div></div>
+  <div class="foot"><button class="btn" data-close>Done</button></div>`,(el,close)=>{const q=s=>el.querySelector(s);
+    q('[data-close]').onclick=close;
+    q('#set-save').onclick=()=>{try{localStorage.setItem('wb_key',q('#set-key').value.trim());toast('Key saved on this device');close()}catch(e){toast('This browser blocked saving the key.')}};
+    if(q('#set-clear'))q('#set-clear').onclick=()=>{try{localStorage.removeItem('wb_key')}catch(e){}toast('Key removed');close()};
+    q('#set-export').onclick=()=>B.exportBackup().then(()=>toast('Backup downloaded')).catch(()=>toast('Could not create the backup.'));
+    q('#set-import').onchange=async()=>{const f=q('#set-import').files[0];if(!f)return;try{const r=await B.importBackup(f);toast(`Restored ${r.places} places and ${r.memories} memories`);close()}catch(e){toast('That file is not a Wonderbook backup.')}};
+    navigator.storage?.estimate?.().then(e=>{if(e?.usage!=null)q('#set-usage').textContent+=` Using ${(e.usage/1048576).toFixed(1)} MB so far.`}).catch(()=>{})})}
+
+/* ---------- boot ---------- */
+(async function boot(){
+  route();await initGlobe();rerender();
+  const timer=setTimeout(()=>{if(S.dbState==='loading'){S.dbState='error';rerender()}},10000);
+  try{B=window.claude?.use?await artifactBackend(window.claude):await localBackend()}
+  catch(e){S.dbState='error'}
+  rerender();
+})();
+</script>
