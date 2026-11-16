@@ -331,6 +331,22 @@ textarea{resize:vertical;min-height:80px;line-height:1.5}
 .seg-toggle button[aria-pressed="true"]{background:var(--sun);color:var(--on)}
 .confetti{position:fixed;left:0;top:0;width:10px;height:14px;z-index:80;pointer-events:none;animation:confetti var(--d,1.4s) cubic-bezier(.2,.6,.4,1) forwards}
 
+/* Trips */
+.route{fill:none;stroke:var(--ink);stroke-width:2.5;stroke-dasharray:7 7;stroke-linecap:round;animation:march 1.2s linear infinite;pointer-events:none}
+.ticket{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;text-align:left;width:100%;padding:10px 14px;background:var(--surface);color:var(--ink);border:2px solid var(--ink);border-radius:10px;box-shadow:3px 3px 0 var(--ink);transition:translate .15s,rotate .15s,box-shadow .15s}
+.ticket:hover{translate:-1px -1px;rotate:-.6deg;box-shadow:4px 4px 0 var(--ink)}
+.ticket .t,.ticket .r{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ticket .t{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1.05}
+.ticket .r{font-family:var(--font-mono);font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.04em}
+.ticket .yr{font-family:var(--font-display);font-weight:700;font-size:32px;line-height:1;border-left:2px dashed var(--line);padding-left:12px;align-self:stretch;display:grid;place-items:center}
+.trip-band{border:2px dashed var(--ink);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;background:color-mix(in srgb,var(--sun) 12%,transparent)}
+.stop-n{width:24px;height:24px;border-radius:50%;background:var(--sun);color:var(--on);border:2px solid var(--ink);display:grid;place-items:center;font-family:var(--font-mono);font-size:12px;line-height:1;flex:none;padding-top:2px}
+.qp.sel{background:var(--sun);color:var(--on)}.qp.sel i{background:var(--ink);color:var(--surface);font-family:var(--font-mono);font-size:11px}
+.fan{display:flex;justify-content:center;padding:10px 0 4px}
+.fan img{width:36%;aspect-ratio:1;object-fit:cover;border:6px solid var(--photo);border-bottom-width:18px;box-shadow:var(--shadow);margin:0 -3%}
+.fan img:nth-child(1){rotate:-6deg}.fan img:nth-child(2){rotate:3deg;z-index:1}.fan img:nth-child(3){rotate:8deg}
+@keyframes march{to{stroke-dashoffset:-14}}
+
 /* Arriving on a page: things land one after another */
 .enter :is(.card,.section,.rank,.wish-card,.tl-year,.stamp,.panel-card,.otd,.cover-fig,.scorecard){animation:rise .5s cubic-bezier(.2,.8,.3,1.15) backwards}
 .enter :is(.card,.section,.rank,.wish-card,.stamp,.tl-card):nth-child(2){animation-delay:.06s}
@@ -467,7 +483,7 @@ const WORLD=195;
 const S={places:[],memories:[],db:null,assets:null,sample:null,dict:null,user:null,
   loaded:{p:false,m:false},dbState:'loading',view:'globe',sel:null,mode:'visited',
   journalFilter:'All',rankCat:'overall',rankBy:'cities',h2h:[null,null],
-  suggestions:{},dictTarget:null,pick:null,journalQ:'',recs:{},recsOpen:{},tlOrder:'asc',panelKey:''};
+  suggestions:{},dictTarget:null,pick:null,trips:[],journalQ:'',recs:{},recsOpen:{},tlOrder:'asc',panelKey:''};
 
 /* ---------- helpers ---------- */
 const $=(s,r=document)=>r.querySelector(s);
@@ -508,7 +524,7 @@ async function initGlobe(){
   G.svg=svg;G.proj=d3.geoOrthographic().clipAngle(90).precision(.4);G.path=d3.geoPath(G.proj);
   G.sphere=svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('fill','url(#oc)');
   G.grat=svg.append('path').datum(d3.geoGraticule10()).attr('class','grat');
-  G.gC=svg.append('g');G.gP=svg.append('g');
+  G.gC=svg.append('g');G.route=svg.append('path').attr('class','route');G.gP=svg.append('g');
   try{
     const topo=await fetch('countries-110m.json').then(r=>r.json());
     G.features=topojson.feature(topo,topo.objects.countries).features.filter(f=>f.properties.name!=='Antarctica');
@@ -535,13 +551,16 @@ function render(){
   G.sphere.attr('d',G.path);G.grat.attr('d',G.path);
   const agg=countryAgg();
   G.countries.attr('d',G.path).attr('fill',d=>fillFor(agg.get(d.id))).classed('sel',d=>S.sel?.type==='country'&&S.sel.id===d.id);
+  const tsel=S.sel?.type==='trip'?trip(S.sel.id):null,tids=new Set(tsel?.placeIds||[]);
+  const rc=tsel?tripPlaces(tsel).filter(p=>typeof p.lat==='number').map(p=>[p.lng,p.lat]):[];
+  G.route.attr('d',rc.length>1?G.path({type:'LineString',coordinates:rc}):null);
   const pts=S.places.filter(p=>typeof p.lat==='number'&&p.kind!=='country');
   const g=G.gP.selectAll('g.city').data(pts,d=>d.id).join(en=>{const e=en.append('g').attr('class','city');e.append('circle').attr('class','ring').attr('r',6);e.append('circle').attr('class','dot');e.append('text').attr('dx',9).attr('dy',4);e.on('click',(ev,d)=>{ev.stopPropagation();selectPlace(d.id,true)}).on('mousemove',(ev,d)=>showTip(ev,d.name)).on('mouseleave',hideTip);return e});
   g.attr('class',d=>`city ${d.status==='wishlist'?'wish':'visited'}${S.sel?.type==='place'&&S.sel.id===d.id?' sel':''}`)
    .attr('display',d=>visibleAt(d.lng,d.lat)?null:'none')
    .attr('transform',d=>{const p=G.proj([d.lng,d.lat]);return p?`translate(${p[0]},${p[1]})`:null});
   g.select('.dot').attr('r',d=>S.sel?.id===d.id?7:Math.min(6,3.5+G.k*.4));
-  g.select('text').text(d=>(G.k>=2.4||S.sel?.id===d.id)?d.name:'');
+  g.select('text').text(d=>(G.k>=2.4||S.sel?.id===d.id||tids.has(d.id))?d.name:'');
 }
 function countryAgg(){const m=new Map();for(const p of S.places){if(!p.countryId)continue;let a=m.get(p.countryId);if(!a){a={visited:false,wish:false,sc:[],live:[],years:[]};m.set(p.countryId,a)}
   if(p.status==='visited'){a.visited=true;const o=overall(p);if(o!=null)a.sc.push(o);if(typeof p.ratings?.live==='number')a.live.push(p.ratings.live);(p.years||[]).forEach(y=>a.years.push(+y))}else a.wish=true}
@@ -583,6 +602,7 @@ function renderPanel(){const el=$('#panel');
   if(S.dbState!=='ready'){el.innerHTML=dbStateHTML();return}
   const key=S.sel?S.sel.type+':'+S.sel.id:'home';if(key!==S.panelKey){S.panelKey=key;enter(el)}
   if(S.sel?.type==='place'&&place(S.sel.id))el.innerHTML=placeHTML(place(S.sel.id));
+  else if(S.sel?.type==='trip'&&trip(S.sel.id))el.innerHTML=tripHTML(trip(S.sel.id));
   else if(S.sel?.type==='country')el.innerHTML=countryHTML(S.sel);
   else el.innerHTML=overviewHTML()}
 function dbStateHTML(){if(S.dbState==='loading')return`<div class="stack"><span class="eyebrow">Wonderbook</span><h2>Opening your journal…</h2><p class="muted"><span class="spinner"></span></p></div>`;
@@ -596,6 +616,7 @@ function overviewHTML(){
   if(!S.places.length)return`<div class="stack"><span class="eyebrow">Welcome</span><h2>Start your Wonderbook</h2><p class="muted">Add the first place you’ve been. It lights up on the globe, and you can add memories, photos and ratings to it.</p><div class="empty"><b>No places yet</b><button class="btn primary" data-act="add-place">Add your first place</button></div></div>`;
   return`<div class="stack">${exampleBanner()}<div><span class="eyebrow">Your world</span><h2>${(n=>n+(n===1?' country':' countries'))(countryCount())}, ${(n=>n+(n===1?' city':' cities'))(v.filter(p=>p.kind!=='country').length)}</h2><p class="muted">Spin the globe, tap a country or a pin to open its page.</p></div>
   ${stampsHTML()}
+  ${tripsSectionHTML()}
   <div class="section"><div class="section-h"><h3>Top rated</h3><a class="btn sm ghost" href="#rankings">All rankings</a></div><div class="list">${top.length?top.map((p,i)=>placeRow(p,`<span class="mono" style="font-weight:700">${f1(overall(p))}</span>`)).join(''):'<p class="muted">Rate a place to see it here.</p>'}</div></div>
   <div class="section"><div class="section-h"><h3>Latest memories</h3><a class="btn sm ghost" href="#journal">Journal</a></div><div class="list">${recent.length?recent.map(memRow).join(''):'<p class="muted">No memories yet. Tap “New memory” and talk about a trip.</p>'}</div></div>
   <div class="section"><div class="section-h"><h3>Want to go</h3><a class="btn sm ghost" href="#wishlist">Wishlist</a></div><div class="list">${w.length?w.slice(0,5).map(p=>placeRow(p,'')).join(''):'<p class="muted">Nothing on your wishlist yet.</p>'}</div></div></div>`}
@@ -618,6 +639,7 @@ function placeHTML(p){const ms=memsOf(p.id);const o=overall(p);const cover=p.cov
   ${cover?`<figure class="polaroid taped cover-fig"><img class="cover" src="${blob(cover)}" alt=""></figure>`:''}
   <div><span class="eyebrow">${esc(p.kind==='country'?'Country':p.country)}</span><h2>${esc(p.name)}</h2>
   <p style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:8px 0 0">${visited?'<span class="pill visited">Been there</span>':'<span class="pill wish">Want to go</span>'}${[...(p.years||[])].sort().map(y=>`<button class="pill mono" data-act="del-year" data-id="${p.id}" data-y="${esc(y)}" title="Tap to remove this year">${esc(y)}</button>`).join('')}${visited?`<button class="btn sm ghost" data-act="add-year" data-id="${p.id}">+ year</button>`:''}</p></div>
+  ${S.trips.filter(t=>(t.placeIds||[]).includes(p.id)).map(ticketHTML).join('')}
   ${visited?`<div class="scorecard"><div class="score-tile hot"><b class="mono">${f1(o)}</b><span>Overall</span></div><div class="score-tile"><b class="mono">${f1(p.ratings?.live)}</b><span>Could I live here?</span></div></div>`:`<button class="btn primary" data-act="mark-visited" data-id="${p.id}">I went! Move to Been there</button>`}
   <div class="section"><div class="section-h"><h3>Memories</h3><button class="btn sm primary" data-act="new-memory" data-id="${p.id}">+ Memory</button></div>
   <div class="list">${ms.length?ms.map(memRow).join(''):`<div class="empty">Tap the mic and talk about ${esc(p.name)}. Wonderbook turns it into a journal entry.<button class="btn sm primary" data-act="new-memory" data-id="${p.id}">${ICON.mic} Record a memory</button></div>`}</div></div>
@@ -731,7 +753,7 @@ function timelineData(){const map=new Map();
 function tlCard({p,ms}){const ph=ms.find(m=>m.photos?.length)?.photos[0]||p.coverId;const o=overall(p);
   return`<div class="tl-card"><button class="card taped" data-act="open-place" data-id="${p.id}">${ph?`<img class="ph" src="${blob(ph)}" alt="" loading="lazy">`:`<div class="ph none" style="background:${gradFor(p.name)}">${esc(initials(p.name))}</div>`}<div class="body"><span class="t">${esc(p.name)}</span><span class="meta k">${esc(p.kind==='country'?'Country':p.country)}${o!=null?` · ${f1(o)}/10`:''}</span></div></button>${ms.slice(0,3).map(m=>`<button class="tl-mem" data-act="open-memory" data-id="${m.id}">${esc(m.title||'Untitled memory')}</button>`).join('')}${ms.length>3?`<span class="muted" style="font-size:12px">+${ms.length-3} more in the journal</span>`:''}</div>`}
 function renderTimeline(){const el=$('#v-timeline');const{years,undated}=timelineData();
-  const head=`<div class="page-h"><div><span class="eyebrow">${years.length?`${years.length} year${years.length>1?'s':''} of travel`:'Your travels, year by year'}</span><h2>Timeline</h2></div></div>`;
+  const head=`<div class="page-h"><div><span class="eyebrow">${years.length?`${years.length} year${years.length>1?'s':''} of travel`:'Your travels, year by year'}</span><h2>Timeline</h2></div>${S.places.some(p=>p.status==='visited')?'<button class="btn" data-act="new-trip">+ New trip</button>':''}</div>`;
   TL.obs?.disconnect();
   if(!years.length){TL.years=[];el.innerHTML=`<div class="page-inner">${head}<div class="empty"><b>No years yet</b>Add a place you’ve been and the year you went. It lands here.<button class="btn primary" data-act="add-place" data-status="visited">Add a place</button></div></div>`;return}
   const seen=new Set(),firsts=new Map();for(const yr of years){const cs=new Set(yr.items.map(i=>i.p.countryId||i.p.country));firsts.set(yr.y,[...cs].filter(c=>!seen.has(c)).length);cs.forEach(c=>seen.add(c))}
@@ -740,7 +762,7 @@ function renderTimeline(){const el=$('#v-timeline');const{years,undated}=timelin
   <div class="tl-years" id="tl-years">${shown.map(yr=>`<button data-act="tl-year" data-y="${yr.y}">${yr.y}<span>${pl(yr.items.length,'place','places')}</span></button>`).join('')}</div>
   <div class="tl-ctl"><button class="btn sm primary" data-act="tl-play" id="tl-play">${TL.play?'■ <span class="lbl">Stop</span>':'▶ <span class="lbl">Play my travels</span>'}</button><button class="btn sm" data-act="tl-order" title="Change the order">⇅ <span class="lbl">${S.tlOrder==='asc'?'Oldest first':'Newest first'}</span></button></div></aside>
   <div class="tl-main">${head}<div class="tl-line">${shown.map(yr=>{const cs=new Set(yr.items.map(i=>i.p.countryId||i.p.country)).size,mc=d3.sum(yr.items,i=>i.ms.length),nf=firsts.get(yr.y);
-    return`<section class="tl-year" data-y="${yr.y}" id="tl-${yr.y}"><h3 class="tl-yh">${yr.y}</h3><p class="tl-stats">${pl(yr.items.length,'place','places')} · ${pl(cs,'country','countries')}${mc?' · '+pl(mc,'memory','memories'):''}${nf?' · '+pl(nf,'new country','new countries'):''}</p><div class="tl-grid">${yr.items.map(tlCard).join('')}</div></section>`}).join('')}
+    return`<section class="tl-year" data-y="${yr.y}" id="tl-${yr.y}"><h3 class="tl-yh">${yr.y}</h3><p class="tl-stats">${pl(yr.items.length,'place','places')} · ${pl(cs,'country','countries')}${mc?' · '+pl(mc,'memory','memories'):''}${nf?' · '+pl(nf,'new country','new countries'):''}</p>${tlYearBody(yr)}</section>`}).join('')}
   ${undated.length?`<section class="tl-year" data-y="0"><h3 class="tl-yh" style="font-size:60px">Sometime</h3><p class="tl-stats">No year yet. Open a place and tap “+ year”.</p><div class="tl-grid">${undated.map(p=>tlCard({p,ms:[]})).join('')}</div></section>`:''}</div></div></div>`;
   TL.obs=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting)tlActive(+e.target.dataset.y)},{root:el,rootMargin:'-30% 0px -69% 0px'});
   el.querySelectorAll('.tl-year').forEach(s=>{if(+s.dataset.y)TL.obs.observe(s)});
@@ -755,6 +777,7 @@ function tlActive(y,force){if(!force&&TL.active===y)return;TL.active=y;const el=
 function tlGlobe(y){const cv=$('#tl-canvas');const yr=TL.years.find(x=>x.y===y);if(!cv||!yr||!G.features.length)return;
   const ps=yr.items.map(i=>i.p).filter(p=>typeof p.lat==='number'),all=ps.map(p=>[p.lng,p.lat]),pins=ps.filter(p=>p.kind!=='country').map(p=>[p.lng,p.lat]);
   const now=new Set(yr.items.map(i=>String(i.p.countryId))),before=new Set(TL.years.filter(x=>x.y<y).flatMap(x=>x.items.map(i=>String(i.p.countryId))));
+  const routes=S.trips.filter(t=>+t.year===y).map(t=>({type:'LineString',coordinates:tripPlaces(t).filter(p=>typeof p.lat==='number').map(p=>[p.lng,p.lat])})).filter(r=>r.coordinates.length>1);
   const c=all.length?d3.geoCentroid({type:'MultiPoint',coordinates:all}):[-TL.rot[0],-TL.rot[1]];
   const spread=all.length?d3.max(all,p=>d3.geoDistance(p,c)):1,k1=Math.max(1,Math.min(2.8,.75/(spread+.25)));
   const r0=TL.rot.slice(),k0=TL.k,dl=((-c[0]-r0[0])%360+540)%360-180,ri=d3.interpolate(r0,[r0[0]+dl,-c[1],0]);
@@ -763,6 +786,7 @@ function tlGlobe(y){const cv=$('#tl-canvas');const yr=TL.years.find(x=>x.y===y);
   const draw=t=>{TL.rot=ri(t);TL.k=k0+(k1-k0)*t;proj.rotate(TL.rot).scale(W/2*TL.k);
     ctx.fillStyle=col.ocean;ctx.fillRect(0,0,W,W);ctx.lineWidth=1;ctx.strokeStyle=col.line;
     for(const f of G.features){const id=String(f.id);ctx.beginPath();path(f);ctx.fillStyle=col.land;ctx.fill();if(now.has(id)||before.has(id)){ctx.fillStyle=now.has(id)?col.now:col.before;ctx.fill()}ctx.stroke()}
+    ctx.setLineDash([9,9]);ctx.lineWidth=3;ctx.strokeStyle=col.ink;for(const r of routes){ctx.beginPath();path(r);ctx.stroke()}ctx.setLineDash([]);ctx.lineWidth=1;ctx.strokeStyle=col.line;
     for(const p of pins){if(d3.geoDistance(p,[-TL.rot[0],-TL.rot[1]])>1.5)continue;const q=proj(p);ctx.beginPath();ctx.arc(q[0],q[1],10,0,7);ctx.fillStyle=col.pin;ctx.fill();ctx.lineWidth=3;ctx.strokeStyle=col.ink;ctx.stroke();ctx.lineWidth=1;ctx.strokeStyle=col.line}};
   TL.timer?.stop();if(matchMedia('(prefers-reduced-motion: reduce)').matches){draw(1);return}
   const t0=performance.now();TL.timer=d3.timer(()=>{const t=Math.min(1,(performance.now()-t0)/900);draw(d3.easeCubicInOut(t));if(t>=1)TL.timer.stop()})}
@@ -772,6 +796,57 @@ function tlPlay(){const label=()=>{const b=$('#tl-play');if(b)b.innerHTML=TL.pla
   const ys=[...$('#v-timeline').querySelectorAll('.tl-year')].map(s=>+s.dataset.y).filter(Boolean);let i=0;
   const step=()=>{if(S.view!=='timeline'||i>=ys.length){stop();return}$('#tl-'+ys[i])?.scrollIntoView({behavior:'smooth',block:'start'});i++};
   TL.play=setInterval(step,2600);label();step()}
+
+/* ---------- trips: several places from one journey, with the route drawn between them ---------- */
+function trip(id){return S.trips.find(t=>t.id===id)}
+function tripPlaces(t){return(t.placeIds||[]).map(place).filter(Boolean)}
+function tripMems(t){return S.memories.filter(m=>(t.placeIds||[]).includes(m.placeId)&&(!t.year||+(m.date||'').slice(0,4)===+t.year)).sort((a,b)=>(a.date||'').localeCompare(b.date||''))}
+function tripAutoName(ps,year){ps=ps.filter(Boolean);const cs=[...new Set(ps.map(p=>p.country||p.name))];
+  const n=cs.length===1?(ps.length===1?ps[0].name:cs[0]):cs.length===2?cs.join(' & '):cs.slice(0,2).join(', ')+' & more';return n+(year?' '+year:'')}
+function ticketHTML(t){const ps=tripPlaces(t);return`<button class="ticket" data-act="open-trip" data-id="${t.id}"><span style="min-width:0"><span class="r">Trip · ${ps.length} stop${ps.length===1?'':'s'}</span><span class="t">${esc(t.name)}</span><span class="r">${ps.map(p=>esc(p.name)).join(' → ')}</span></span><span class="yr">${esc(t.year||'')}</span></button>`}
+function tripsSectionHTML(){if(!S.places.some(p=>p.status==='visited'))return'';const ts=[...S.trips].sort((a,b)=>(+b.year||0)-(+a.year||0));
+  return`<div class="section"><div class="section-h"><h3>Trips</h3><button class="btn sm" data-act="new-trip">+ New trip</button></div><div class="list">${ts.length?ts.map(ticketHTML).join(''):'<p class="muted" style="margin:0">Group the places from one journey, like “Japan 2019”, and see the route on the globe.</p>'}</div></div>`}
+function tripHTML(t){const ps=tripPlaces(t),ms=tripMems(t),cs=new Set(ps.map(p=>p.countryId||p.country)).size,avg=d3.mean(ps.map(overall).filter(x=>x!=null)),ph=ms.flatMap(m=>m.photos||[]).slice(0,3);
+  const pl=(n,a,b)=>`${n} ${n===1?a:b}`;
+  return`<div class="stack"><button class="back" data-act="home">‹ Your world</button>
+  ${ph.length?`<div class="fan">${ph.map(x=>`<img src="${blob(x)}" alt="">`).join('')}</div>`:''}
+  <div><span class="eyebrow">Trip${t.year?' · '+esc(t.year):''}</span><h2>${esc(t.name)}</h2><p style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0"><span class="pill">${pl(ps.length,'stop','stops')}</span><span class="pill">${pl(cs,'country','countries')}</span>${ms.length?`<span class="pill">${pl(ms.length,'memory','memories')}</span>`:''}${avg!=null?`<span class="pill">Average ${f1(avg)}/10</span>`:''}</p></div>
+  ${t.note?`<div class="note y"><p style="margin:0">${esc(t.note)}</p></div>`:''}
+  <div class="section"><div class="section-h"><h3>The route</h3></div><div class="list">${ps.map((p,i)=>`<button class="place-row" data-act="open-place" data-id="${p.id}"><span class="stop-n">${i+1}</span><span class="nm">${esc(p.name)}<span class="muted" style="font-weight:400"> · ${esc(p.kind==='country'?'Country':p.country)}</span></span>${overall(p)!=null?`<span class="mono" style="font-weight:700">${f1(overall(p))}</span>`:''}</button>`).join('')||'<p class="muted" style="margin:0">The places in this trip were deleted.</p>'}</div></div>
+  <div class="section"><div class="section-h"><h3>Memories</h3></div><div class="list">${ms.length?ms.map(memRow).join(''):`<p class="muted" style="margin:0">No memories from ${t.year?esc(t.year):'this trip'} yet. Open a stop and record one.</p>`}</div></div>
+  <div class="section" style="flex-direction:row;gap:10px;flex-wrap:wrap"><button class="btn sm" data-act="edit-trip" data-id="${t.id}">Edit trip</button><button class="btn sm ghost" data-act="del-trip" data-id="${t.id}" style="color:var(--visit)">Delete trip</button></div></div>`}
+function selectTrip(id){const t=trip(id);if(!t)return;S.sel={type:'trip',id};if(S.view!=='globe')go('globe');
+  const cs=tripPlaces(t).filter(p=>typeof p.lat==='number').map(p=>[p.lng,p.lat]);
+  if(cs.length){const c=d3.geoCentroid({type:'MultiPoint',coordinates:cs}),sp=d3.max(cs,p=>d3.geoDistance(p,c));flyTo(c[0],c[1],Math.max(1,Math.min(6,.8/(sp+.12))))}
+  renderPanel();render();$('#panel').scrollTop=0}
+function tlYearBody(yr){const ts=S.trips.filter(t=>+t.year===yr.y&&tripPlaces(t).length),used=new Set(ts.flatMap(t=>t.placeIds)),by=new Map(yr.items.map(i=>[i.p.id,i]));
+  const rest=yr.items.filter(i=>!used.has(i.p.id));
+  return ts.map(t=>`<div class="trip-band">${ticketHTML(t)}<div class="tl-grid">${tripPlaces(t).map(p=>tlCard(by.get(p.id)||{p,ms:[]})).join('')}</div></div>`).join('')
+    +(rest.length?`<div class="tl-grid">${rest.map(tlCard).join('')}</div>`:'')
+    +(rest.length>=2?`<button class="btn sm" style="align-self:flex-start" data-act="new-trip" data-y="${yr.y}" data-ids="${rest.map(i=>i.p.id).join(',')}">+ Make these a trip</button>`:'')}
+function openTripEditor(opts={}){const t=opts.trip;const visited=S.places.filter(p=>p.status==='visited');
+  if(!visited.length){toast('Add a place you’ve been first.');openAddPlace({status:'visited'});return}
+  let sel=(t?t.placeIds||[]:opts.placeIds||[]).filter(id=>place(id));
+  const y0=t?t.year||'':opts.year||new Date().getFullYear();
+  openModal(`<h2>${t?'Edit trip':'New trip'}</h2><p class="muted" style="margin:-8px 0 0">One journey, several stops. The route shows on the globe and in the timeline.</p>
+  <div class="row2"><label class="field">Trip name<input type="text" id="t-name" value="${esc(t?.name||'')}" autocomplete="off"></label><label class="field">Year<input type="number" id="t-year" value="${esc(y0)}" min="1950" max="2100"></label></div>
+  <div class="field">Stops <span class="muted" style="font-weight:400">Tap the places in the order you went. Tap again to take one out.</span><div class="quick-chips" id="t-places"></div></div>
+  <label class="field">A line about it (optional)<textarea id="t-note" rows="2" style="min-height:0">${esc(t?.note||'')}</textarea></label>
+  <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="t-save">Save trip</button></div>`,(el,close)=>{const q=s=>el.querySelector(s);
+    const year=()=>{const y=+q('#t-year').value;return y>1900&&y<2101?y:null};
+    const draw=()=>{const y=year(),has=p=>(p.years||[]).map(Number).includes(y);
+      const list=[...visited].sort((a,b)=>(has(b)?1:0)-(has(a)?1:0)||a.name.localeCompare(b.name));
+      q('#t-places').innerHTML=list.map(p=>{const i=sel.indexOf(p.id);return`<button type="button" class="qp ${i>=0?'sel':''}" data-p="${p.id}" aria-pressed="${i>=0}"><i>${i>=0?i+1:'+'}</i>${esc(p.name)}</button>`}).join('');
+      q('#t-name').placeholder=sel.length?tripAutoName(sel.map(place),y):'e.g. Japan 2019'};
+    q('#t-places').onclick=e=>{const b=e.target.closest('[data-p]');if(!b)return;const id=b.dataset.p;sel=sel.includes(id)?sel.filter(x=>x!==id):[...sel,id];draw()};
+    q('#t-year').oninput=draw;draw();q('[data-close]').onclick=close;
+    q('#t-save').onclick=async()=>{if(!sel.length){toast('Tap at least one place for this trip.');return}
+      const y=year(),id=t?.id||uid(),doc={name:q('#t-name').value.trim()||tripAutoName(sel.map(place),y),year:y,placeIds:sel,note:q('#t-note').value.trim(),createdAt:t?.createdAt||Date.now()};
+      q('#t-save').disabled=true;
+      try{await B.setTrip(id,doc);if(!trip(id))S.trips.push({id,...doc});
+        if(y)for(const p of sel.map(place))if(p&&!(p.years||[]).map(Number).includes(y))await savePlace(p.id,{years:[...(p.years||[]),y]});
+        close();toast(t?'Trip saved':`${doc.name} added`);if(!t)confetti();selectTrip(id)}
+      catch(e){q('#t-save').disabled=false;toast('Could not save the trip. Try again.')}}})}
 
 /* ---------- modals ---------- */
 function openModal(html,mount){const o=document.createElement('div');o.className='overlay';o.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
@@ -1007,6 +1082,11 @@ ${ms.map(m=>`- ${m.date}: ${m.title}. ${m.body} Highlights: ${(m.highlights||[])
   case'tl-year':$('#tl-'+a.dataset.y)?.scrollIntoView({behavior:'smooth',block:'start'});break;
   case'tl-play':tlPlay();break;
   case'tl-order':S.tlOrder=S.tlOrder==='asc'?'desc':'asc';renderTimeline();$('#v-timeline').scrollTop=0;break;
+  case'new-trip':openTripEditor({year:+a.dataset.y||undefined,placeIds:a.dataset.ids?a.dataset.ids.split(','):[]});break;
+  case'open-trip':selectTrip(id);break;
+  case'edit-trip':openTripEditor({trip:trip(id)});break;
+  case'del-trip':{if(a.dataset.armed!=='1'){a.dataset.armed='1';a.textContent='Tap again: removes the trip, keeps the places';break}
+    try{await B.delTrip(id);S.trips=S.trips.filter(t=>t.id!==id);S.sel=null;rerender();toast('Trip removed')}catch(err){toast('Could not delete. Try again.')}break}
   case'settings':openSettings();break;
   case'sync-now':if(B.sync?.status()==='auth')openSettings();else B.sync?.now();break;
   case'jfilter':S.journalFilter=a.dataset.f;renderJournal();break;
@@ -1131,12 +1211,13 @@ function geoCountry(name){const f=G.features.find(x=>x.properties.name.toLowerCa
 async function artifactBackend(C){
   let sample=null;
   const db=await C.use('db');if(!db)throw{code:'unavailable'};
-  const P=db.collection(PLACES),M=db.collection(MEMS);
+  const P=db.collection(PLACES),M=db.collection(MEMS),T=db.collection('wb/journal/trips');
   const be={mode:'artifact',url:id=>'/_blob/'+id,photo:null,hasAI:()=>!!sample,
     ai:async p=>{if(!sample)throw{code:'unavailable'};return sample.json(p,{modelTier:'default'})},
     geocode:async(name,country)=>geoCountry(name)||be.ai(`Find this place for a travel journal map: "${name}"${country?`, in ${country}`:''}.
 Return JSON only: {"found": true or false, "kind": "city" or "country", "name": the usual English name (just the city or country, no region), "country": the country it is in (English common name), "lat": latitude number, "lng": longitude number}. For a country, use its geographic centre.`),
     setPlace:(id,d)=>P.doc(id).set(d),updatePlace:(id,d)=>P.doc(id).update(d),delPlace:id=>P.doc(id).delete(),
+    setTrip:(id,d)=>T.doc(id).set(d),delTrip:id=>T.doc(id).delete(),
     addMem:d=>M.add(d),updateMem:(id,d)=>M.doc(id).update(d),delMem:id=>M.doc(id).delete()};
   C.use('assets').then(a=>{if(a)be.photo={upload:async b=>(await a.upload(b)).id,del:id=>a.delete(id)}});
   C.use('sample').then(x=>{sample=x;rerender()});
@@ -1146,15 +1227,16 @@ Return JSON only: {"found": true or false, "kind": "city" or "country", "name": 
   const ready=()=>{if(S.loaded.p&&S.loaded.m)S.dbState='ready';rerender()};
   P.onSnapshot(snap=>{S.places=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded.p=true;if(S.sel?.type==='place'&&!place(S.sel.id))S.sel=null;ready()},onErr);
   M.onSnapshot(snap=>{S.memories=snap.docs.map(d=>({id:d.id,...d.data()}));S.loaded.m=true;ready()},onErr);
+  T.onSnapshot(snap=>{S.trips=snap.docs.map(d=>({id:d.id,...d.data()}));rerender()},()=>{});
   return be}
 
 async function localBackend(){
-  const idb=await new Promise((res,rej)=>{const r=indexedDB.open('wonderbook',1);r.onupgradeneeded=()=>{['places','memories','photos'].forEach(n=>r.result.createObjectStore(n))};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+  const idb=await new Promise((res,rej)=>{const r=indexedDB.open('wonderbook',2);r.onupgradeneeded=()=>{['places','memories','photos','trips'].forEach(n=>{if(!r.result.objectStoreNames.contains(n))r.result.createObjectStore(n)})};r.onsuccess=()=>{r.result.onversionchange=()=>r.result.close();res(r.result)};r.onerror=()=>rej(r.error)});
   const tx=(store,mode,fn)=>new Promise((res,rej)=>{const t=idb.transaction(store,mode);const q=fn(t.objectStore(store));t.oncomplete=()=>res(q?.result);t.onerror=t.onabort=()=>rej(t.error)});
   const all=async store=>{const keys=await tx(store,'readonly',s=>s.getAllKeys()),vals=await tx(store,'readonly',s=>s.getAll());return keys.map((k,i)=>[k,vals[i]])};
-  const P=new Map(await all('places')),M=new Map(await all('memories')),urls=new Map();
+  const P=new Map(await all('places')),M=new Map(await all('memories')),T=new Map(await all('trips')),urls=new Map();
   for(const[id,b]of await all('photos'))urls.set(id,URL.createObjectURL(b));
-  const emit=()=>{S.places=[...P].map(([id,d])=>({id,...d}));S.memories=[...M].map(([id,d])=>({id,...d}));if(S.sel?.type==='place'&&!P.has(S.sel.id))S.sel=null;rerender()};
+  const emit=()=>{S.places=[...P].map(([id,d])=>({id,...d}));S.memories=[...M].map(([id,d])=>({id,...d}));S.trips=[...T].map(([id,d])=>({id,...d}));if(S.sel?.type==='trip'&&!T.has(S.sel.id))S.sel=null;if(S.sel?.type==='place'&&!P.has(S.sel.id))S.sel=null;rerender()};
   const put=async(store,map,id,d)=>{const{id:_,...doc}=d;doc.updatedAt=Date.now();map.set(id,doc);await tx(store,'readwrite',s=>s.put(doc,id));emit();scheduleSync()};
   const del=async(store,map,id)=>{map.delete(id);await tx(store,'readwrite',s=>s.delete(id));ls.set('wb_deleted',{...ls.get('wb_deleted',{}),[id]:Date.now()});emit();scheduleSync()};
   /* ---- sync between devices through a private GitHub repository the owner controls ---- */
@@ -1171,9 +1253,9 @@ async function localBackend(){
     sync.running=true;setStatus('syncing');
     try{
       for(let attempt=0;;attempt++){
-        let remote={places:{},memories:{},deleted:{}},sha=null;
+        let remote={places:{},memories:{},trips:{},deleted:{}},sha=null;
         const r=await gh(cfg,'/contents/journal.json?ref='+encodeURIComponent(cfg.branch));
-        if(r.status===200){const j=await r.json();sha=j.sha;let c=j.content;if(!c)c=(await(await gh(cfg,'/git/blobs/'+j.sha)).json()).content;const d=JSON.parse(b64d(c));remote={places:d.places||{},memories:d.memories||{},deleted:d.deleted||{}}}
+        if(r.status===200){const j=await r.json();sha=j.sha;let c=j.content;if(!c)c=(await(await gh(cfg,'/git/blobs/'+j.sha)).json()).content;const d=JSON.parse(b64d(c));remote={places:d.places||{},memories:d.memories||{},trips:d.trips||{},deleted:d.deleted||{}}}
         else if(r.status===401||r.status===403)throw{code:'auth'};
         else if(r.status!==404)throw{code:'net'};
         const deleted={...remote.deleted};for(const[k,v]of Object.entries(ls.get('wb_deleted',{})))deleted[k]=Math.max(deleted[k]||0,v);
@@ -1182,7 +1264,7 @@ async function localBackend(){
             if(deleted[id]&&deleted[id]>=(w.updatedAt||0)){if(l){map.delete(id);await tx(store,'readwrite',s=>s.delete(id))}continue}
             out[id]=w;if(w!==l){map.set(id,w);await tx(store,'readwrite',s=>s.put(w,id))}}
           return out};
-        const next={v:1,places:await merge('places',P,remote.places),memories:await merge('memories',M,remote.memories),deleted};
+        const next={v:1,places:await merge('places',P,remote.places),memories:await merge('memories',M,remote.memories),trips:await merge('trips',T,remote.trips),deleted};
         ls.set('wb_deleted',deleted);emit();
         if(canon(next)===canon({v:1,...remote}))break;
         const w=await putFile(cfg,'journal.json',b64e(JSON.stringify(next)),sha);
@@ -1224,14 +1306,16 @@ async function localBackend(){
       const hit=(country&&rs.find(x=>(x.country||'').toLowerCase().includes(country.toLowerCase())))||rs[0];
       return{found:true,kind:String(hit.feature_code||'').startsWith('PCL')?'country':'city',name:hit.name,country:hit.country||country,lat:hit.latitude,lng:hit.longitude}},
     setPlace:(id,d)=>put('places',P,id,d),updatePlace:(id,d)=>put('places',P,id,{...P.get(id),...d}),delPlace:id=>del('places',P,id),
+    setTrip:(id,d)=>put('trips',T,id,d),delTrip:id=>del('trips',T,id),
     addMem:d=>put('memories',M,uid(),d),updateMem:(id,d)=>put('memories',M,id,{...M.get(id),...d}),delMem:id=>del('memories',M,id),
     exportBackup:async()=>{const photos={};for(const[id,b]of await all('photos'))photos[id]=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(b)});
-      const data={app:'wonderbook',v:1,exportedAt:new Date().toISOString(),places:S.places,memories:S.memories,photos};
+      const data={app:'wonderbook',v:1,exportedAt:new Date().toISOString(),places:S.places,memories:S.memories,trips:S.trips,photos};
       const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download=`wonderbook-backup-${today()}.json`;document.body.appendChild(a);a.click();a.remove()},
     importBackup:async file=>{const data=JSON.parse(await file.text());if(data.app!=='wonderbook')throw new Error('not a backup');
       for(const[id,u]of Object.entries(data.photos||{})){const b=await fetch(u).then(r=>r.blob());await tx('photos','readwrite',s=>s.put(b,id));if(!urls.has(id))urls.set(id,URL.createObjectURL(b))}
       for(const p of data.places||[]){const{id,...d}=p;P.set(id,d);await tx('places','readwrite',s=>s.put(d,id))}
       for(const m of data.memories||[]){const{id,...d}=m;M.set(id,d);await tx('memories','readwrite',s=>s.put(d,id))}
+      for(const t of data.trips||[]){const{id,...d}=t;T.set(id,d);await tx('trips','readwrite',s=>s.put(d,id))}
       emit();scheduleSync();return{places:(data.places||[]).length,memories:(data.memories||[]).length}}};
   navigator.storage?.persist?.().catch(()=>{});
   S.dict=localDictation();$('#btn-settings').hidden=false;
