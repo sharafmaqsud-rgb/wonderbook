@@ -492,7 +492,7 @@ function renderWishlist(){const el=$('#v-wishlist');const w=S.places.filter(p=>p
 /* ---------- modals ---------- */
 function openModal(html,mount){const o=document.createElement('div');o.className='overlay';o.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
   o.addEventListener('mousedown',e=>{if(e.target===o)closeModal(o)});$('#layer').appendChild(o);mount?.(o.firstElementChild,()=>closeModal(o));return o}
-function closeModal(o){if(S.dict?.active?.())S.dict.stop().catch(()=>{});S.dictTarget=null;o.remove()}
+function closeModal(o){if(S.dict?.active?.())S.dict.stop().catch(()=>{});S.flushDraft?.();S.flushDraft=null;S.dictTarget=null;o.remove()}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){const l=$('.lightbox');if(l)return l.remove();const o=[...document.querySelectorAll('.overlay')].pop();if(o)closeModal(o)}});
 
 function openAddPlace(opts={}){
@@ -538,9 +538,13 @@ async function createPlace(d){const id=uid();const doc={name:d.name,kind:d.kind|
   const dup=S.places.find(p=>p.name.toLowerCase()===doc.name.toLowerCase()&&p.country===doc.country);if(dup){toast(`${dup.name} is already in your Wonderbook`);selectPlace(dup.id,true);return}
   try{await B.setPlace(id,doc);if(!place(id))S.places.push({id,...doc});toast(`${doc.name} added`);selectPlace(id,true)}catch(e){toast('Could not save the place. Try again.')}}
 
+/* Unsaved memory drafts: kept on every keystroke and when the tab is hidden or closed, restored on return. */
+const draftStore={get(){try{return JSON.parse(localStorage.getItem('wb_draft')||'null')}catch(e){return null}},set(v){try{localStorage.setItem('wb_draft',JSON.stringify(v))}catch(e){}},clear(){try{localStorage.removeItem('wb_draft')}catch(e){}}};
+document.addEventListener('visibilitychange',()=>{if(document.hidden)S.flushDraft?.()});
+window.addEventListener('pagehide',()=>S.flushDraft?.());
 function openComposer(opts={}){
-  const m=opts.mem||{};
-  const D={placeId:m.placeId||opts.placeId||(S.sel?.type==='place'?S.sel.id:'')||'',photos:[...(m.photos||[])],files:[],tags:[...(m.tags||[])],ratings:null};
+  let m=opts.mem||{};const draft=draftStore.get();const restored=!!draft&&(draft.id||null)===(m.id||null);if(restored)m={...m,...draft.f};
+  const D={placeId:m.placeId||opts.placeId||(S.sel?.type==='place'?S.sel.id:'')||'',photos:[...(m.photos||[])],files:[],added:restored?[...(draft.f.added||[])]:[],tags:[...(m.tags||[])],ratings:null};
   if(!S.places.length){toast('Add a place first, then add memories to it.');openAddPlace();return}
   const opt=g=>S.places.filter(p=>p.status===g).map(p=>`<option value="${p.id}" ${D.placeId===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
   openModal(`<h2>${m.id?'Edit memory':'New memory'}</h2>
@@ -557,14 +561,20 @@ function openComposer(opts={}){
   <div class="field">Photos<div class="photos" id="c-photos"></div></div>
   <div class="foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="c-save">Save memory</button></div>`,(el,close)=>{
     const q=s=>el.querySelector(s);
-    q('[data-close]').onclick=close;
-    q('#c-tags').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;D.tags=D.tags.includes(t)?D.tags.filter(x=>x!==t):[...D.tags,t];b.setAttribute('aria-pressed',D.tags.includes(t))};
+    const lns=v=>v.split('\n').map(x=>x.trim()).filter(Boolean);
+    const saveDraft=()=>{if(!el.isConnected)return;const f={placeId:q('#c-place').value,date:q('#c-date').value,transcript:q('#c-tr').value,title:q('#c-title').value,body:q('#c-body').value,highlights:lns(q('#c-hi').value),takeaways:lns(q('#c-tk').value),tags:D.tags,photos:D.photos,added:D.added};
+      if(f.transcript.trim()||f.title.trim()||f.body.trim()||f.highlights.length||f.takeaways.length||f.photos.length)draftStore.set({id:m.id||null,at:Date.now(),f})};
+    let dT=null;const later=()=>{clearTimeout(dT);dT=setTimeout(saveDraft,400)};
+    S.flushDraft=saveDraft;el.addEventListener('input',later);el.addEventListener('change',later);
+    if(restored)toast('Your unsaved memory is back. Cancel discards it.',4500);
+    q('[data-close]').onclick=()=>{close();draftStore.clear();for(const id of D.added)B.photo?.del(id).catch(()=>{})};
+    q('#c-tags').onclick=e=>{const b=e.target.closest('button');if(!b)return;const t=b.dataset.t;D.tags=D.tags.includes(t)?D.tags.filter(x=>x!==t):[...D.tags,t];b.setAttribute('aria-pressed',D.tags.includes(t));later()};
     const drawPhotos=()=>{q('#c-photos').innerHTML=D.photos.map((id,i)=>`<div class="ph-item"><img src="${blob(id)}" alt=""><button type="button" data-rm="o${i}" aria-label="Remove photo">×</button></div>`).join('')+D.files.map((f,i)=>`<div class="ph-item"><img src="${URL.createObjectURL(f)}" alt=""><button type="button" data-rm="n${i}" aria-label="Remove photo">×</button></div>`).join('')+(B.photo?`<label class="photo-add">+ Add photos<input type="file" accept="image/*" multiple hidden id="c-file"></label>`:`<span class="muted" style="font-size:13px">Photo uploads aren’t available in this view.</span>`);
-      const fi=q('#c-file');if(fi)fi.onchange=()=>{D.files.push(...fi.files);drawPhotos()}};
-    q('#c-photos').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const v=b.dataset.rm;if(v[0]==='o')D.photos.splice(+v.slice(1),1);else D.files.splice(+v.slice(1),1);drawPhotos()};drawPhotos();
+      const fi=q('#c-file');if(fi)fi.onchange=async()=>{const fs=[...fi.files];let bad=0;const lab=fi.closest('label');lab.firstChild.textContent='Adding…';for(const f of fs){try{const id=await B.photo.upload(await compress(f));D.photos.push(id);D.added.push(id)}catch(e){bad++}}if(bad)toast(`${bad} photo${bad>1?'s':''} couldn’t be added (try JPEG or PNG).`);drawPhotos();saveDraft()}};
+    q('#c-photos').onclick=e=>{const b=e.target.closest('[data-rm]');if(!b)return;const v=b.dataset.rm;if(v[0]==='o')D.photos.splice(+v.slice(1),1);else D.files.splice(+v.slice(1),1);drawPhotos();later()};drawPhotos();
     // dictation
     const tr=q('#c-tr'),mic=q('#c-mic');
-    S.dictTarget={append:t=>{tr.value=(tr.value?tr.value:'')+(tr.value?t:t.trimStart())},partial:t=>{q('#c-partial').textContent=t},state:(st,reason)=>{const live=st!=='idle';mic.classList.toggle('live',live);mic.innerHTML=live?ICON.stop:ICON.mic;mic.setAttribute('aria-label',live?'Stop':'Start talking');
+    S.dictTarget={append:t=>{tr.value=(tr.value?tr.value:'')+(tr.value?t:t.trimStart());later()},partial:t=>{q('#c-partial').textContent=t},state:(st,reason)=>{const live=st!=='idle';mic.classList.toggle('live',live);mic.innerHTML=live?ICON.stop:ICON.mic;mic.setAttribute('aria-label',live?'Stop':'Start talking');
       q('#c-micst').textContent=st==='listening'?'Listening… tap to stop':st==='starting'?'Starting…':st==='finishing'?'Finishing up…':(reason==='not_granted'?'Microphone is off. Type instead.':'Tap the mic and talk it through');if(!live)q('#c-partial').textContent=''}};
     mic.onclick=()=>{if(!S.dict)return;if(S.dict.active()){S.dict.stop().catch(()=>{});return}
       S.dict.start().catch(e=>{if(e?.code==='not_granted'){mic.hidden=true;toast('Microphone access is off. You can type instead.')}else if(e?.code==='unavailable'){mic.hidden=true}else if(e?.code!=='stopped'&&e?.code!=='dismissed')toast('Dictation stopped. Tap the mic to try again.')})};
@@ -588,7 +598,7 @@ What they said:
         if(Array.isArray(r.tags)){D.tags=r.tags.filter(t=>TAGS.includes(t));q('#c-tags').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',D.tags.includes(b.dataset.t)))}
         const rt=Object.fromEntries(Object.entries(r.ratings||{}).filter(([k,v])=>CATS.some(c=>c.k===k)&&Number.isFinite(+v)).map(([k,v])=>[k,Math.max(1,Math.min(10,Math.round(+v)))]));
         if(Object.keys(rt).length){D.ratings=rt;const box=q('#c-rates');box.hidden=false;box.className='ai-box';box.innerHTML=`<span class="eyebrow">Ratings you hinted at</span><div class="chips">${Object.entries(rt).map(([k,v])=>`<span class="pill">${CATS.find(c=>c.k===k).short} <b class="mono">${v}</b></span>`).join('')}</div><label style="display:flex;gap:8px;align-items:center;font-size:14px"><input type="checkbox" id="c-apply" checked> Add these to the place’s ratings where I haven’t rated yet</label>`}
-        toast('Organised. Check it over, then save.');
+        saveDraft();toast('Organised. Check it over, then save.');
       }catch(e){toast(aiErr(e))}finally{ai.disabled=false;ai.innerHTML=`${ICON.spark} Organise my notes`}};
     // save
     q('#c-save').onclick=async()=>{const placeId=q('#c-place').value;if(!placeId){toast('Choose which place this memory is from.');q('#c-place').focus();return}
@@ -603,7 +613,7 @@ What they said:
           const y=+(data.date||'').slice(0,4);if(y&&!(p.years||[]).map(Number).includes(y))upd.years=[...(p.years||[]),y];
           if(D.ratings&&q('#c-apply')?.checked){const r={...(p.ratings||{})};for(const[k,v]of Object.entries(D.ratings))if(typeof r[k]!=='number')r[k]=v;upd.ratings=r}
           if(Object.keys(upd).length)await savePlace(p.id,upd)}
-        close();toast(failed?`Memory saved. ${failed} photo${failed>1?'s':''} couldn’t upload (try JPEG or PNG).`:'Memory saved');
+        close();draftStore.clear();toast(failed?`Memory saved. ${failed} photo${failed>1?'s':''} couldn’t upload (try JPEG or PNG).`:'Memory saved');
       }catch(e){btn.disabled=false;btn.textContent='Save memory';toast('Could not save. Check your connection and try again.')}};
   })}
 async function compress(file){if(!file.type.startsWith('image/')||file.type==='image/gif')return file;
@@ -823,7 +833,7 @@ async function localBackend(){
       ls.set('wb_synced_at',Date.now());setStatus('ok');
     }catch(e){setStatus(e?.code==='auth'?'auth':'error')}
     finally{sync.running=false;if(sync.again){sync.again=false;syncNow()}}}
-  const scheduleSync=()=>{if(!ls.get('wb_sync',null))return;clearTimeout(sync.timer);sync.timer=setTimeout(syncNow,2500)};
+  const scheduleSync=()=>{if(!ls.get('wb_sync',null))return;clearTimeout(sync.timer);sync.timer=setTimeout(()=>{sync.timer=null;syncNow()},2500)};
   const be={mode:'local',url:id=>urls.get(id)||'',hasAI:()=>true,
     sync:{cfg:()=>ls.get('wb_sync',null),last:()=>ls.get('wb_synced_at',0),status:()=>sync.status,now:syncNow,
       connect:async(repo,token)=>{const r=await gh({repo,token},'');if(r.status===401)throw{code:'bad_token'};if(!r.ok)throw{code:'no_repo'};const j=await r.json();if(j.permissions&&j.permissions.push===false)throw{code:'read_only'};ls.set('wb_sync',{repo,token,branch:j.default_branch||'main'});await syncNow()},
@@ -854,7 +864,8 @@ async function localBackend(){
   navigator.storage?.persist?.().catch(()=>{});
   S.dict=localDictation();$('#btn-settings').hidden=false;
   S.dbState='ready';emit();
-  if(ls.get('wb_sync',null)){syncNow();document.addEventListener('visibilitychange',()=>{if(!document.hidden)syncNow()})}
+  if(ls.get('wb_sync',null))syncNow();
+  document.addEventListener('visibilitychange',()=>{if(!ls.get('wb_sync',null))return;if(!document.hidden)syncNow();else if(sync.timer){clearTimeout(sync.timer);sync.timer=null;syncNow()}});
   if('serviceWorker'in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
   return be}
 
@@ -922,5 +933,8 @@ function openSettings(){if(B.mode!=='local')return;if($('#set-key'))return;
   try{B=window.claude?.use?await artifactBackend(window.claude):await localBackend()}
   catch(e){S.dbState='error'}
   rerender();
+  const reopen=n=>{const d=draftStore.get();if(!d||$('.overlay'))return;if(S.dbState!=='ready'){if(n>0)setTimeout(()=>reopen(n-1),700);return}
+    const mem=d.id?S.memories.find(x=>x.id===d.id):undefined;if(d.id&&!mem){draftStore.clear();return}if(S.places.length)openComposer({mem})};
+  setTimeout(()=>reopen(8),500);
 })();
 </script>

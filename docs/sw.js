@@ -1,5 +1,5 @@
 // Network first, falling back to the last saved copy, so Wonderbook still opens offline.
-const CACHE = 'wonderbook-v3';
+const CACHE = 'wonderbook-v4';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {
